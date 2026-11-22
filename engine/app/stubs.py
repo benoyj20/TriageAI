@@ -3,7 +3,7 @@
 Each stub is replaced by its owner's module in pipeline.STAGES:
 
     language, global_search, classify, route_and_search  -> ML engineer (engine/app/analyze, engine/app/retrieval)
-    draft, validate                                      -> Hriday (engine/app/generate)
+    draft, validate                                      -> Benoy (engine/app/generate)
 
 The gate stage is already real (data analyst, engine/app/policy). /healthz lists which
 stages are still stubs. Stub output is deliberately honest: low confidence and no

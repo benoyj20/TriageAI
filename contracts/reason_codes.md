@@ -14,9 +14,9 @@ The gate lives in `engine/app/policy/gate.py` (data analyst). The engine calls i
 | `NO_PRECEDENT` | P2 | `retrieval.top_similarity` (after the global fallback) is below the threshold (0.28 today), including when there are no precedents | ML engineer (ML-14) |
 | `LOW_CONFIDENCE` | P2 | min(type confidence, priority confidence) is below the floor (0.42 today). Queue confidence is not included | ML engineer (ML-12) |
 | `UNSUPPORTED_REQUEST` | P2 | Full refund, compensation, payouts, SLA guarantees and similar demands | Data analyst (DA-04) |
-| `UNGROUNDED_DRAFT` | P2 | A `generated` draft still fails validation after one retry | Hriday (H-11) |
+| `UNGROUNDED_DRAFT` | P2 | A `generated` draft still fails validation after one retry | Benoy (H-11) |
 | `UNSUPPORTED_LANGUAGE` | P2 | Detected language is not `en` or `de`. The draft is then written in English | ML engineer (ML-06) |
-| `ENGINE_DEGRADED` | P2 | The LLM failed (timeout or error) and the extractive fallback was used, or the gate itself failed | Hriday (H-12) |
+| `ENGINE_DEGRADED` | P2 | The LLM failed (timeout or error) and the extractive fallback was used, or the gate itself failed | Benoy (H-12) |
 
 ## How the engine fills the gate's inputs
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Deploy main on the EC2 box. Hriday only.
+# Deploy main on the EC2 box. Benoy only.
 #   ./infra/deploy.sh                  pull, build, restore Redis on first run, start, warm up
 #   ./infra/deploy.sh --no-pull        deploy what is on disk
 #   RESTORE_REDIS=1 ./infra/deploy.sh  reload the Redis index from R2 (after a re-index)

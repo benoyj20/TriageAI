@@ -1,6 +1,6 @@
 # infra/
 
-Owner: Hriday. Only Hriday deploys.
+Owner: Benoy. Only Benoy deploys.
 
 ## Keys and buckets (H-03)
 

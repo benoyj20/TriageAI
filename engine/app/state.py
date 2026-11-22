@@ -39,7 +39,7 @@ class TicketState:
     precedents: list[dict[str, Any]] = field(default_factory=list)
     # ticket_id -> the agent's full answer, for the drafting prompt only. Never returned.
     evidence: dict[str, str] = field(default_factory=dict)
-    # draft + validate stages (Hriday) -> contract "draft"
+    # draft + validate stages (Benoy) -> contract "draft"
     draft: dict[str, Any] | None = None
     llm_failed: bool = False
     # Things the model says the evidence can't support; the pipeline turns them into an

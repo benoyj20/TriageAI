@@ -68,8 +68,8 @@ Unknown request fields are ignored. A request body over 64 KiB gets 413.
 | `retrieval.top_similarity`, `retrieval.k` | number, integer | Similarity of `precedents[0]`, or 0 when there are none. `k` is the most precedents returned (5) | ML |
 | `precedents[]` | `{ticket_id, similarity, language, type, queue, priority, subject, answer_snippet, tags}` | Best first. KB IDs only (`TKT-` + 5 digits). `answer_snippet` is the first ~300 characters of the agent's answer. **Can be empty** | ML |
 | `gate` | `{decision, reasons[]}` | `reasons[]` is `{code, severity, detail}`. See [`reason_codes.md`](reason_codes.md) | data analyst |
-| `draft` | `{language, text, citations, mode, validation}` | See Draft modes. `citations` lists every `[TKT-xxxxx]` in `text`, in order of first use | Hriday |
-| `draft.validation` | `{passed, citations_ok, numbers_ok, language_ok, retries, issues}` | `passed` = all three checks. `issues` are sentences for the operator | Hriday |
+| `draft` | `{language, text, citations, mode, validation}` | See Draft modes. `citations` lists every `[TKT-xxxxx]` in `text`, in order of first use | Benoy |
+| `draft.validation` | `{passed, citations_ok, numbers_ok, language_ok, retries, issues}` | `passed` = all three checks. `issues` are sentences for the operator | Benoy |
 | `burst` | null or `{cluster_id, queue, lead_term, ticket_count, first_seen, last_seen}` | Present exactly when `ACTIVE_OUTAGE` fired | data analyst |
 | `latency_ms` | `{gateway, language, classify, retrieve, gate, draft, validate, total}` | Milliseconds. `retrieve` covers embedding, global search, routing and the level-2 search. `total` ≥ the sum of the stages | gateway, engine |
 | `warnings[]` | `{stage, code, message}` | Stage failures and stub notices. For a details or debug view, not the main panel | engine |
@@ -130,7 +130,7 @@ The engine's `GET /healthz` adds `stages`, which says whether each pipeline stag
 
 ## Changing the contract
 
-1. Agree the change with Hriday first.
+1. Agree the change with Benoy first.
 2. Edit `engine/app/schemas.py`, update the examples and this page, and regenerate the schemas with `python -m engine.app.contract_export`.
 3. Run `python -m pytest` from the repo root. It must pass.
 4. Announce it in the team chat. Additive changes bump to 1.x; renames and removals bump to 2.0.

@@ -26,13 +26,13 @@ Run the tests from the repo root with `python -m pytest`.
 
 | Path | What | Owner |
 |---|---|---|
-| `app/main.py` | HTTP endpoints, error envelope | Hriday |
-| `app/schemas.py` | Contract v1 as Pydantic models | Hriday |
-| `app/contract_rules.py` | Cross-field contract rules, used by the tests | Hriday |
-| `app/pipeline.py` | Stage order, timing, failure fallbacks, gate wiring | Hriday |
-| `app/state.py` | `TicketState`, the object every stage reads and writes | Hriday |
+| `app/main.py` | HTTP endpoints, error envelope | Benoy |
+| `app/schemas.py` | Contract v1 as Pydantic models | Benoy |
+| `app/contract_rules.py` | Cross-field contract rules, used by the tests | Benoy |
+| `app/pipeline.py` | Stage order, timing, failure fallbacks, gate wiring | Benoy |
+| `app/state.py` | `TicketState`, the object every stage reads and writes | Benoy |
 | `app/stubs.py` | Stand-in stages until the real ones land | (replaced by each owner) |
-| `app/generate/` | Drafting, validator, LLM-free fallbacks | Hriday |
+| `app/generate/` | Drafting, validator, LLM-free fallbacks | Benoy |
 | `app/analyze/` | Language detection, classifier | ML engineer |
 | `app/retrieval/` | Level-1 router, level-2 chunk search | ML engineer |
 | `app/policy/` | Escalation gate, keywords, burst detector | Data analyst |
@@ -53,8 +53,8 @@ Every stage is `fn(state: TicketState) -> None`. It reads what earlier stages wr
 | `global_search` | `state.query_embedding`, `state.global_neighbours` (unfiltered top 10) | ML engineer | stub |
 | `classify` | `state.classification` | ML engineer | stub |
 | `route_and_search` | `state.retrieval`, `state.precedents`, `state.evidence` (full answers for the prompt) | ML engineer | stub |
-| `draft` | `state.draft` (without `validation`), `state.llm_failed` | Hriday | stub |
-| `validate` | `state.draft["validation"]`, `state.draft["citations"]` | Hriday | stub |
+| `draft` | `state.draft` (without `validation`), `state.llm_failed` | Benoy | stub |
+| `validate` | `state.draft["validation"]`, `state.draft["citations"]` | Benoy | stub |
 | `gate` | `state.gate`, `state.burst` | Data analyst | **real** |
 
 `GET /healthz` lists which stages are still stubs. Stubs are deliberately honest: low confidence and no precedents, so every ticket goes to human review with a holding reply until the real stages are in.

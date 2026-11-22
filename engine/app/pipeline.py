@@ -222,8 +222,8 @@ STAGES: tuple[Stage, ...] = (
     Stage("global_search", "retrieve", stubs.global_search, _fallback_global_search, "ML engineer"),
     Stage("classify", "classify", stubs.classify, _fallback_classify, "ML engineer"),
     Stage("route_and_search", "retrieve", stubs.route_and_search, _fallback_route_and_search, "ML engineer"),
-    Stage("draft", "draft", draft_stage, _fallback_draft, "Hriday"),
-    Stage("validate", "validate", validate_stage, _fallback_validate, "Hriday"),
+    Stage("draft", "draft", draft_stage, _fallback_draft, "Benoy"),
+    Stage("validate", "validate", validate_stage, _fallback_validate, "Benoy"),
     Stage("gate", "gate", run_gate, _fallback_gate, "Data analyst"),
 )
 

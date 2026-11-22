@@ -51,18 +51,18 @@ Run in this order once the blockers are cleared. All commands are in `ml/README.
 2. **ML-07 embed KB** (needs `GEMINI_API_KEY`): `python -m ml.indexing.embed`. About 32.1k KB + 10.5k German + 8k test inputs, `gemini-embedding-2`, 768 dims, checkpoint every 2,000 rows, resumable. Turn on Gemini billing first (README risk list).
 3. **ML-11 retrieval-vote blend** (needs embeddings): `python -m ml.tune_blend` sets `blend_weight` in `thresholds.json`. Until then it is 0 (classifier only).
 4. **ML-14 retrieval quality** (needs embeddings): `python -m ml.indexing.retrieval_quality`. Produces flat vs hierarchical useful@1, agreement@5, routing accuracy, fallback rate, the best routing weight and `min_top1_similarity` (written as `retrieval_threshold`). The gate (DA-03) reads that threshold for NO_PRECEDENT.
-5. **ML-08 load Redis + snapshot** (needs embeddings and Redis Stack): start `redis/redis-stack` with `requirepass`, then `python -m ml.indexing.build_index --url redis://:<pw>@localhost:6379 --snapshot`. Check `INFO memory` after loading. Copy `dump.rdb` to R2 as `redis/dump_v1.rdb` (infra step, Hriday).
+5. **ML-08 load Redis + snapshot** (needs embeddings and Redis Stack): start `redis/redis-stack` with `requirepass`, then `python -m ml.indexing.build_index --url redis://:<pw>@localhost:6379 --snapshot`. Check `INFO memory` after loading. Copy `dump.rdb` to R2 as `redis/dump_v1.rdb` (infra step, Benoy).
 6. **Live Redis test**: `REDIS_URL=... python -m pytest ml/tests/test_search.py` (currently skipped).
 7. **ML-16 latency** (needs key and Redis): `python -m ml.latency`. Retrieval latency is skipped without Redis.
 8. **ML-15 final holdout** with blend: `python -m ml.evaluate --blend`.
 9. **ML-18**: paste the metrics and method into `ml/README.md`.
 
-ML-09/12/13 (classify stage, temperature calibration, priority/incident thresholds) are implemented in `train.py` / `classify.py` and measured above. ML-17 generation audit needs Hriday's generator and QA. Wiring `Classifier` and `retrieve()` into `engine/app/pipeline` is Hriday's file.
+ML-09/12/13 (classify stage, temperature calibration, priority/incident thresholds) are implemented in `train.py` / `classify.py` and measured above. ML-17 generation audit needs Benoy's generator and QA. Wiring `Classifier` and `retrieve()` into `engine/app/pipeline` is Benoy's file.
 
 ## Design decisions and where they differ from the README
 - **Two-level hierarchy only** (queue, chunk) as the README says. Type and priority are TAG fields, not tree levels. This replaces the deeper queue -> type -> priority tree discussed earlier; SX-03 (third level) is the stretch for that.
 - **Data:** deduped 40,167 rows, not the README's "about 49,400 chunks" (that figure matches all 61,765 rows concatenated, which double-counts overlapping rows and mixes in German rows with no answers).
-- **`precedent` TAG added** to the chunk hash and index. German rows get queue `Miscellaneous`, `precedent=0`; every citation search filters `@precedent:{1}` and routing skips that node. Hriday should know, since it extends the field list in the README.
+- **`precedent` TAG added** to the chunk hash and index. German rows get queue `Miscellaneous`, `precedent=0`; every citation search filters `@precedent:{1}` and routing skips that node. Benoy should know, since it extends the field list in the README.
 - **Queue nodes also hold `queried_count`**, bumped with the chunks. Telemetry only.
 - **`queried_count`** increments only when `count=True`. Eval, benchmark and golden runs use `count=False` (`UPDATE_QUERIED_COUNT=false`). It does not affect ranking.
 - **Shared Gemini client:** the README plans one in `engine/app/common` (H-07). Until it exists, `engine/app/analyze/embedder.py` is the single embedder for KB and live queries (same settings, vectors re-normalised after truncation). The README's `PYTHONPATH=engine` convention may need the imports adjusted when H-07 lands.
