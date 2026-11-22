@@ -235,10 +235,11 @@ cp infra/env.template .env
 
 | Variable | Set it to |
 | :--- | :--- |
-| `OPENAI_API_KEY` or `GEMINI_API_KEY` | your key (OpenAI is tried first, Gemini is the fallback) |
+| `OPENAI_API_KEY` or `GEMINI_API_KEY` | your key (OpenAI is tried first, Gemini is the fallback). Set both to get the same fallback chain as production |
 | `REDIS_PASSWORD` | any local password, for example `change-me-locally` |
 | `REDIS_URL` | `redis://:<the same password>@localhost:6379/0` |
 | `SYNC_ARTIFACTS` | `false`, so the engine uses your local `ml/artifacts/` instead of downloading from cloud storage |
+| `LLM_TIMEOUT_S` | `10` (the Gemini API rejects deadlines under 10 s) |
 
 Leave the cloud storage (`R2_*`) values blank; they are not needed locally. `.env` is gitignored, so your key never
 leaves your machine through git.
@@ -251,17 +252,24 @@ docker compose --env-file .env -f infra/docker-compose.dev.yml up -d   # Redis S
 ```
 
 **3. Build the data, model and index** (one time). The dataset and model are not in the repo, so a fresh clone
-needs all four steps.
+needs all six steps.
 
 ```bash
 python -m ml.split                         # download the pinned dataset revision, make the 80/20 split
 python -m ml.train                         # classifier, calibration, thresholds
 python -m ml.indexing.embed                # embed 42,675 KB + 8,034 holdout tickets (a few minutes, uses your key)
+python -m ml.tune_blend                    # tune the neighbour-vote blend on kb_val (offline, picks 0.5)
+python -m ml.indexing.retrieval_quality    # tune queue routing for retrieval (offline)
 python -m ml.indexing.build_index --url redis://:<REDIS_PASSWORD>@localhost:6379/0   # load it into Redis
 ```
 
-The index is kept in a Docker volume, so it survives restarts. Re-run the last two steps only if you change the
-embedding provider or model.
+The two tuning steps write `blend_weight` and the routing settings into `ml/artifacts/models/v1/thresholds.json`.
+Skip them and the engine runs the classifier alone, which scores 4 to 11 points lower. To confirm you match the
+deployed model, run `python -m ml.evaluate --blend`: it should report macro-F1 of about 0.89 / 0.70 / 0.64 for type,
+priority and queue, and 0.870 high-priority incident recall.
+
+The index is kept in a Docker volume, so it survives restarts. Re-run the indexing and tuning steps only if you change
+the embedding provider or model.
 
 **4. Run it** in two terminals.
 
@@ -272,6 +280,9 @@ python -m uvicorn engine.app.main:app --port 8000 --workers 1
 # Terminal 2: build the console, then start the gateway against the real engine
 cd frontend && npm install && npm run build && cd ../backend
 MOCK_ENGINE=false go run ./cmd/api
+
+# Once both are up: send two warm-up tickets, as production does after every deploy
+python infra/warmup.py http://localhost:8080
 ```
 
 Open **<http://localhost:8080>**, go to **Live triage** and run the **Hospital VPN outage** scenario. You should see
@@ -286,6 +297,7 @@ The gateway reads its settings from the shell, not from `.env`, which is why `MO
 docker compose --env-file .env -f infra/docker-compose.dev.yml up -d
 python -m uvicorn engine.app.main:app --port 8000 --workers 1      # terminal 1
 cd backend && MOCK_ENGINE=false go run ./cmd/api                   # terminal 2
+python infra/warmup.py http://localhost:8080                       # warm up
 ```
 
 <details>
@@ -298,6 +310,8 @@ docker compose --env-file .env -f infra/docker-compose.dev.yml up -d
 python -m ml.split
 python -m ml.train
 python -m ml.indexing.embed
+python -m ml.tune_blend
+python -m ml.indexing.retrieval_quality
 python -m ml.indexing.build_index --url redis://:<REDIS_PASSWORD>@localhost:6379/0
 
 # Terminal 1
@@ -306,6 +320,9 @@ python -m uvicorn engine.app.main:app --port 8000 --workers 1
 # Terminal 2
 cd frontend; npm install; npm run build; cd ..\backend
 $env:MOCK_ENGINE = "false"; go run ./cmd/api
+
+# Once both are up
+python infra/warmup.py http://localhost:8080
 ```
 
 </details>
@@ -323,11 +340,12 @@ Set `VITE_USE_MOCK=true` to run the console entirely in the browser with no gate
 <summary>Troubleshooting</summary>
 
 - **`failed to connect to the docker API`:** Docker Desktop is not running. Start it and wait until it says it is running.
-- **The first ticket times out (`ENGINE_TIMEOUT`):** the engine is warming up after start. Send it again; later tickets answer in about 1.5 s.
+- **The first ticket times out (`ENGINE_TIMEOUT`):** the engine is warming up after start. Run `python infra/warmup.py http://localhost:8080`, or send it again; later tickets answer in about 1.5 s.
+- **Scores are lower than the README (about 0.86 / 0.59 / 0.53 macro-F1):** the blend was not tuned. Run `python -m ml.tune_blend` and `python -m ml.indexing.retrieval_quality`, then restart the engine.
 - **`AuthenticationError` from Redis:** the password inside `REDIS_URL` does not match `REDIS_PASSWORD`. Make them the same. If you changed `REDIS_PASSWORD`, recreate the container: `docker compose --env-file .env -f infra/docker-compose.dev.yml up -d --force-recreate`.
 - **Console shows example answers, not real ones:** the gateway is still in mock mode. Start it with `MOCK_ENGINE=false`.
 - **No precedents found:** the index is empty. Run `python -m ml.indexing.embed`, then `python -m ml.indexing.build_index --url <REDIS_URL>`.
-- **Drafts fall back to an extractive answer:** no working LLM key. Check `OPENAI_API_KEY` or `GEMINI_API_KEY` in `.env`.
+- **Drafts fall back to an extractive answer:** no working LLM key. Check `OPENAI_API_KEY` or `GEMINI_API_KEY` in `.env`. The engine log line `live stages enabled: ... generation=[...]` lists the providers it found.
 - **Switched embedding provider:** re-run both indexing steps. Vectors from different models cannot share an index.
 
 </details>
