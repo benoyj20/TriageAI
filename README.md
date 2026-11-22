@@ -20,7 +20,7 @@ and German, and a human sees why each decision was made.
 🥈 **Second prize** at the
 [GDG Cloud Boston x Northeastern University Hackathon](https://gdg.community.dev/events/details/google-gdg-boston-presents-gdg-cloud-boston-x-northeastern-university-hackathon/)
 
-**[Watch the demo video](https://youtu.be/UBkSEnIPQRM)** &nbsp;·&nbsp; **[Try the live app](https://gdg-sentinal.vercel.app/)** &nbsp;·&nbsp; **[Run it locally](#run-it-locally)**
+**[Watch the demo video](https://youtu.be/UBkSEnIPQRM)** &nbsp;·&nbsp; **[Run it locally](#run-it-locally)**
 
 </div>
 
@@ -54,13 +54,13 @@ quotes a number that is not in any record does more harm than no reply at all.
 
 Every number is on the **20% holdout (8,034 tickets)** that was never used for training, tuning or indexing.
 
-| Target | Macro-F1 (deployed) | Accuracy | ECE | Macro-F1 (classifier alone) |
+| Target | Macro-F1 (blend) | Accuracy | ECE | Macro-F1 (classifier alone) |
 | :--- | ---: | ---: | ---: | ---: |
 | Type (4 classes) | **0.894** | 0.891 | 0.059 | 0.859 |
 | Priority (3 classes) | **0.704** | 0.718 | 0.113 | 0.592 |
 | Queue (10 classes) | **0.639** | 0.655 | 0.129 | 0.528 |
 
-The deployed engine blends the classifier with the votes of the 5 nearest past tickets (`blend_weight` 0.5, tuned on
+The engine blends the classifier with the votes of the 5 nearest past tickets (`blend_weight` 0.5, tuned on
 `kb_val`). The neighbour vote lifts every head by 4 to 11 points.
 
 **High-priority incident recall** (1,462 true high-priority incidents in the holdout):
@@ -166,9 +166,9 @@ flowchart LR
 | Vector store | Redis Query Engine, HNSW cosine, 768 dimensions |
 | Embeddings | OpenAI `text-embedding-3-small` (Gemini `gemini-embedding-2` without an OpenAI key) |
 | Drafts | OpenAI `gpt-5.4-mini`, then Gemini, then an extractive fallback |
-| Deploy | Docker Compose on AWS EC2, Caddy for TLS, artifacts in Cloudflare R2 |
+| Runs on | Docker Compose (Redis) plus local processes, all on localhost |
 
-The private engine and Redis are never exposed; only the gateway is public.
+The engine and Redis are private; only the gateway is reachable by the console.
 More detail: [`docs/architecture-diagram.md`](docs/architecture-diagram.md),
 [`docs/system-architecture-and-stack-guide.md`](docs/system-architecture-and-stack-guide.md) and the frozen API
 contract in [`contracts/`](contracts/README.md).
@@ -203,29 +203,135 @@ The pre-freeze checklist is in [`qa/final_regression.md`](qa/final_regression.md
 
 ## Run it locally
 
-Needs **Node 20+**, **Go 1.22+**, **Python 3.11+** and **Docker** (for Redis).
+Everything runs on your own machine: the console, the gateway, the engine, Redis, and the full AI pipeline
+(embeddings, retrieval, grounded drafts). The only outside calls are to the LLM provider you configure.
 
-**Console and gateway, no keys.** The gateway answers with the contract's example responses:
+Needs **Node 20+**, **Go 1.22+**, **Python 3.11+**, **Docker** and **git**, plus an **OpenAI** or **Gemini** API key
+for the AI part.
+
+```
+Browser :8080 ──► Go gateway :8080 ──► Python engine :8000 ──► Redis :6379 (Docker)
+                                                 └──► OpenAI / Gemini (your key)
+```
+
+### Quick look, no keys (2 minutes)
+
+The gateway answers with the contract's example responses, so you can click through the whole console offline.
 
 ```bash
 git clone https://github.com/benoyj20/TriageAI.git && cd TriageAI
 cd frontend && npm install && npm run build
-cd ../backend && go run ./cmd/api          # http://localhost:8080
+cd ../backend && go run ./cmd/api          # open http://localhost:8080
 ```
 
-**Full pipeline:**
+### Full pipeline with the AI part
+
+Start **Docker Desktop** first. The steps below were tested end to end on Windows 11 with OpenAI as the provider.
+
+**1. Configure.** Copy the template and fill in your key.
 
 ```bash
-cp infra/env.template .env                 # fill in OPENAI_API_KEY and REDIS_PASSWORD
+cp infra/env.template .env
+```
+
+| Variable | Set it to |
+| :--- | :--- |
+| `OPENAI_API_KEY` or `GEMINI_API_KEY` | your key (OpenAI is tried first, Gemini is the fallback) |
+| `REDIS_PASSWORD` | any local password, for example `change-me-locally` |
+| `REDIS_URL` | `redis://:<the same password>@localhost:6379/0` |
+| `SYNC_ARTIFACTS` | `false`, so the engine uses your local `ml/artifacts/` instead of downloading from cloud storage |
+
+Leave the cloud storage (`R2_*`) values blank; they are not needed locally. `.env` is gitignored, so your key never
+leaves your machine through git.
+
+**2. Install and start Redis.**
+
+```bash
 pip install -r requirements.txt
-docker compose --env-file .env -f infra/docker-compose.dev.yml up -d     # Redis Stack
+docker compose --env-file .env -f infra/docker-compose.dev.yml up -d   # Redis Stack, UI at http://localhost:8001
+```
+
+**3. Build the data, model and index** (one time). The dataset and model are not in the repo, so a fresh clone
+needs all four steps.
+
+```bash
 python -m ml.split                         # download the pinned dataset revision, make the 80/20 split
 python -m ml.train                         # classifier, calibration, thresholds
-python -m ml.indexing.embed                # embed the knowledge base
-python -m ml.indexing.build_index --url redis://:<REDIS_PASSWORD>@localhost:6379
-uvicorn engine.app.main:app --port 8000 --workers 1
-cd backend && MOCK_ENGINE=false go run ./cmd/api
+python -m ml.indexing.embed                # embed 42,675 KB + 8,034 holdout tickets (a few minutes, uses your key)
+python -m ml.indexing.build_index --url redis://:<REDIS_PASSWORD>@localhost:6379/0   # load it into Redis
 ```
+
+The index is kept in a Docker volume, so it survives restarts. Re-run the last two steps only if you change the
+embedding provider or model.
+
+**4. Run it** in two terminals.
+
+```bash
+# Terminal 1: engine
+python -m uvicorn engine.app.main:app --port 8000 --workers 1
+
+# Terminal 2: build the console, then start the gateway against the real engine
+cd frontend && npm install && npm run build && cd ../backend
+MOCK_ENGINE=false go run ./cmd/api
+```
+
+Open **<http://localhost:8080>**, go to **Live triage** and run the **Hospital VPN outage** scenario. You should see
+every stage light up with real timings, five retrieved precedents and a drafted German reply, in under 2 seconds.
+`http://localhost:8080/api/v1/health` should report `"mode": "live"` with engine, gateway and vector DB all `ok`.
+
+The gateway reads its settings from the shell, not from `.env`, which is why `MOCK_ENGINE=false` is set on the command.
+
+**Next time** (index already built): start Docker Desktop, then
+
+```bash
+docker compose --env-file .env -f infra/docker-compose.dev.yml up -d
+python -m uvicorn engine.app.main:app --port 8000 --workers 1      # terminal 1
+cd backend && MOCK_ENGINE=false go run ./cmd/api                   # terminal 2
+```
+
+<details>
+<summary>Windows (PowerShell)</summary>
+
+```powershell
+Copy-Item infra\env.template .env          # then fill in your key and the Redis values
+pip install -r requirements.txt
+docker compose --env-file .env -f infra/docker-compose.dev.yml up -d
+python -m ml.split
+python -m ml.train
+python -m ml.indexing.embed
+python -m ml.indexing.build_index --url redis://:<REDIS_PASSWORD>@localhost:6379/0
+
+# Terminal 1
+python -m uvicorn engine.app.main:app --port 8000 --workers 1
+
+# Terminal 2
+cd frontend; npm install; npm run build; cd ..\backend
+$env:MOCK_ENGINE = "false"; go run ./cmd/api
+```
+
+</details>
+
+<details>
+<summary>Developing the console with hot reload</summary>
+
+Run `npm run dev` in `frontend/` instead of building, with `frontend/.env.local` set to `VITE_USE_MOCK=false` and
+an empty `VITE_API_BASE`. Vite serves on its own port and proxies `/api` to the gateway on `:8080`.
+Set `VITE_USE_MOCK=true` to run the console entirely in the browser with no gateway at all.
+
+</details>
+
+<details>
+<summary>Troubleshooting</summary>
+
+- **`failed to connect to the docker API`:** Docker Desktop is not running. Start it and wait until it says it is running.
+- **The first ticket times out (`ENGINE_TIMEOUT`):** the engine is warming up after start. Send it again; later tickets answer in about 1.5 s.
+- **`AuthenticationError` from Redis:** the password inside `REDIS_URL` does not match `REDIS_PASSWORD`. Make them the same. If you changed `REDIS_PASSWORD`, recreate the container: `docker compose --env-file .env -f infra/docker-compose.dev.yml up -d --force-recreate`.
+- **Console shows example answers, not real ones:** the gateway is still in mock mode. Start it with `MOCK_ENGINE=false`.
+- **No precedents found:** the index is empty. Run `python -m ml.indexing.embed`, then `python -m ml.indexing.build_index --url <REDIS_URL>`.
+- **Drafts fall back to an extractive answer:** no working LLM key. Check `OPENAI_API_KEY` or `GEMINI_API_KEY` in `.env`.
+- **Switched embedding provider:** re-run both indexing steps. Vectors from different models cannot share an index.
+
+</details>
 
 **Evaluate and test:**
 
@@ -237,7 +343,37 @@ cd backend && go test ./...
 cd frontend && npm test
 ```
 
-Production deploy: [`infra/README.md`](infra/README.md) and [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
+## Hackathon deployment (original setup)
+
+For the hackathon the app ran live in the cloud, so judges could open it in a browser. This repo is now set up to run
+locally; the deploy files are kept in [`infra/`](infra/) for reference.
+
+```
+Browser ──► Vercel (React console)
+              │  /api/* rewrite (same origin, no CORS)
+              ▼
+           AWS EC2
+           Caddy :443 (Let's Encrypt) ─► Go gateway :8080 ─► Python engine :8000 ─► Redis Stack :6379
+                                         PII mask, rate limit   OpenAI first, Gemini fallback   hierarchical index
+           Cloudflare R2: trained classifier + thresholds, Redis index snapshot
+```
+
+| Piece | Where it ran | Built from |
+| :--- | :--- | :--- |
+| Console | Vercel, root directory `frontend/` | [`frontend/vercel.json`](frontend/vercel.json) |
+| Gateway, engine, Redis, Caddy | one EC2 instance (t3.medium, Ubuntu 24.04), Docker Compose | [`infra/docker-compose.prod.yml`](infra/docker-compose.prod.yml) |
+| Classifier and thresholds | Cloudflare R2 `models/v1/`, pulled by the engine at start | `python -m ml.train` |
+| Redis index (about 42k tickets, 768-d vectors) | Cloudflare R2 snapshot, restored on first deploy | `python -m ml.indexing.build_index --snapshot` |
+| Secrets | `.env` on the EC2 box only | [`infra/env.template`](infra/env.template) |
+
+- **Locked down.** Only Caddy was public (ports 80 and 443). The gateway, engine and Redis talked on the internal
+  Docker network. SSH was key-only, with fail2ban installed by [`infra/ec2_bootstrap.sh`](infra/ec2_bootstrap.sh).
+- **One-command deploys.** [`infra/deploy.sh`](infra/deploy.sh) pulled `main`, built the images, restored the Redis
+  snapshot on the first run, started the stack, waited for `/api/v1/health` over HTTPS and sent two warm-up tickets.
+- **Same engine, two homes.** The cloud and local setups run the same code; only where Redis and the artifacts come
+  from changes.
+
+The full runbook is in [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 ## Repository
 
@@ -249,7 +385,7 @@ Production deploy: [`infra/README.md`](infra/README.md) and [`docs/DEPLOYMENT.md
 | `ml/` | Split, training, indexing, evaluation |
 | `analytics/` | EDA and Reports data |
 | `contracts/` | API contract v1 (frozen) |
-| `infra/` | Docker, deploy, Redis |
+| `infra/` | Local Redis setup, plus the original hackathon deploy files |
 | `qa/` | Test plan, golden set, leakage audit |
 | `docs/` | Architecture, demo script, build plan |
 
@@ -257,7 +393,7 @@ Production deploy: [`infra/README.md`](infra/README.md) and [`docs/DEPLOYMENT.md
 
 Built on [`Tobi-Bueck/customer-support-tickets`](https://huggingface.co/datasets/Tobi-Bueck/customer-support-tickets)
 (CC BY-NC 4.0). The dataset, splits, embeddings and models are never committed; they live in `ml/artifacts/`
-(gitignored) and in Cloudflare R2.
+(gitignored).
 
 <sub>Built by a team at the GDG Cloud Boston x Northeastern University Hackathon. Licensed under MIT, see
 [LICENSE](LICENSE).</sub>
