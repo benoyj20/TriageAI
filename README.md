@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/media/demo.gif" alt="TriageAI live triage: a German hospital VPN-outage ticket is masked, classified as an incident, matched to five past tickets, gated, and escalated to on-call with a held German draft" width="880">
+<img src="docs/media/demo.gif" alt="TriageAI live triage: an English hospital VPN-outage ticket has its phone number masked, is classified as a high-priority incident, matched to five past tickets, gated, and escalated to on-call with the draft held" width="880">
 
 # TriageAI · 🥈 2nd Place, GDG Cloud Boston x Northeastern Hackathon
 
@@ -78,7 +78,7 @@ shows the real time of every stage on every ticket.
 <table>
   <tr>
     <td width="50%" valign="top">
-      <img src="docs/media/triage-pipeline.png" alt="Live triage: language detected as German, classified as an incident, the phone number hidden before any model sees it"><br>
+      <img src="docs/media/triage-pipeline.png" alt="Live triage: the phone number is masked, the language is detected as English and the ticket is classified as a high-priority incident"><br>
       <b>Live triage.</b> Language, type, queue and priority with confidence. The phone number is masked first.
     </td>
     <td width="50%" valign="top">
@@ -88,7 +88,7 @@ shows the real time of every stage on every ticket.
   </tr>
   <tr>
     <td width="50%" valign="top">
-      <img src="docs/media/escalation.png" alt="A German draft reply citing two past tickets, a draft check passing, and an Escalated to on-call banner"><br>
+      <img src="docs/media/escalation.png" alt="A draft reply citing two past tickets, a draft check passing, and an Escalated to on-call banner"><br>
       <b>Grounded draft.</b> The reply cites real tickets, passes the check, and waits for a person.
     </td>
     <td width="50%" valign="top">
