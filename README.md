@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="docs/media/demo.gif" alt="SentinelDesk live triage: a German hospital VPN-outage ticket is masked, classified as an incident, matched to five past tickets, gated, and escalated to on-call with a held German draft" width="880">
+
 # SentinelDesk
 
 **Incident triage that explains itself.** Every incoming support ticket is classified, gated, matched against
@@ -73,6 +75,46 @@ on `kb_val`, never on the holdout.
 
 **Latency:** 2.6 ms language detection and 9.0 ms classification per ticket (p50, offline, one laptop). The console
 shows the real time of every stage on every ticket.
+
+## See it in action
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="docs/media/triage-pipeline.png" alt="Live triage: language detected as German, classified as an incident, the phone number hidden before any model sees it"><br>
+      <b>Live triage.</b> Language, type, queue and priority with confidence. The phone number is masked first.
+    </td>
+    <td width="50%" valign="top">
+      <img src="docs/media/safety-gate.png" alt="Five similar past tickets retrieved and the safety gate showing a high-priority incident rule fired"><br>
+      <b>Precedents and gate.</b> Five similar resolved tickets, and the rule that fired, in plain words.
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="docs/media/escalation.png" alt="A German draft reply citing two past tickets, a draft check passing, and an Escalated to on-call banner"><br>
+      <b>Grounded draft.</b> The reply cites real tickets, passes the check, and waits for a person.
+    </td>
+    <td width="50%" valign="top">
+      <img src="docs/media/pii-masking.png" alt="A ticket with card number, IBAN, email and phone; the gateway reports four pieces of personal data hidden"><br>
+      <b>PII guardrail.</b> Card, IBAN, email and phone are masked before the engine sees anything.
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="docs/media/auto-send.png" alt="A routine password-reset ticket where all eleven rules pass, shown as Ready to send"><br>
+      <b>Routine, handled.</b> All eleven rules pass and the reply is ready to send untouched.
+    </td>
+    <td width="50%" valign="top">
+      <img src="docs/media/outage-overview.png" alt="Overview with a red major-incident banner and several escalated VPN tickets in English and German"><br>
+      <b>Outage burst.</b> Similar incidents in two languages trigger a major-incident banner.
+    </td>
+  </tr>
+</table>
+
+<p align="center">
+  <img src="docs/media/insights.png" alt="Reports page: of 100 real high-priority tickets, 85 go on-call and 15 are missed, with type, priority and language breakdowns" width="880"><br>
+  <sub><b>Reports.</b> Of 100 real high-priority incidents, 85 are escalated. The console shows the trade-off openly.</sub>
+</p>
 
 ## What makes it different
 
