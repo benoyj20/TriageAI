@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="docs/media/demo.gif" alt="SentinelDesk live triage: a German hospital VPN-outage ticket is masked, classified as an incident, matched to five past tickets, gated, and escalated to on-call with a held German draft" width="880">
+<img src="docs/media/demo.gif" alt="TriageAI live triage: a German hospital VPN-outage ticket is masked, classified as an incident, matched to five past tickets, gated, and escalated to on-call with a held German draft" width="880">
 
-# SentinelDesk
+# TriageAI
 
 **Incident triage that explains itself.** Every incoming support ticket is classified, gated, matched against
 resolved precedents and answered with a drafted reply that cites the past tickets it used. It works in English
@@ -28,7 +28,7 @@ and German, and a human sees why each decision was made.
 
 ## Award
 
-SentinelDesk won **second prize** at the
+TriageAI won **second prize** at the
 [GDG Cloud Boston x Northeastern University Hackathon](https://gdg.community.dev/events/details/google-gdg-boston-presents-gdg-cloud-boston-x-northeastern-university-hackathon/).
 The brief: build a multilingual triage and escalation system on the public
 [`Tobi-Bueck/customer-support-tickets`](https://huggingface.co/datasets/Tobi-Bueck/customer-support-tickets)
@@ -42,7 +42,7 @@ Support teams get a flood of tickets in several languages. The urgent ones (an o
 the same queue as "how do I reset my password". Automated replies are risky too: a model that invents a policy or
 quotes a number that is not in any record does more harm than no reply at all.
 
-**SentinelDesk triages first, then answers only from evidence.** For every ticket (subject optional, body required):
+**TriageAI triages first, then answers only from evidence.** For every ticket (subject optional, body required):
 
 1. **Classify and prioritise.** Type, queue and priority, each with a calibrated confidence.
 2. **Gate it.** Escalate to on-call, send to human review, or mark the draft ready, and say why.
