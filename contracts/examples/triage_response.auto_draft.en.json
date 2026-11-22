@@ -1,0 +1,112 @@
+{
+  "contract_version": "1.0",
+  "request_id": "req_5f2c9a1e7b30",
+  "ticket_id": "LIVE-3F9A1C2E",
+  "subject": "Password reset link not arriving",
+  "body": "Hi, I requested a password reset for my account [EMAIL_1] three times today but the email never arrives. Can you help?",
+  "created_at": "2026-11-21T14:02:11Z",
+  "processed_at": "2026-11-21T14:02:12.655Z",
+  "language": { "code": "en", "confidence": 0.99, "supported": true },
+  "pii": { "masked": [{ "type": "EMAIL", "count": 1 }] },
+  "classification": {
+    "type": {
+      "label": "Request",
+      "confidence": 0.86,
+      "probs": { "Request": 0.86, "Incident": 0.08, "Problem": 0.05, "Change": 0.01 }
+    },
+    "queue": {
+      "label": "IT Support",
+      "confidence": 0.74,
+      "probs": {
+        "IT Support": 0.74,
+        "Technical Support": 0.14,
+        "Customer Service": 0.06,
+        "Product Support": 0.03,
+        "General Inquiry": 0.02
+      },
+      "votes": 4,
+      "k": 5
+    },
+    "priority": {
+      "label": "medium",
+      "confidence": 0.71,
+      "probs": { "high": 0.09, "medium": 0.71, "low": 0.2 },
+      "p_high": 0.09
+    }
+  },
+  "retrieval": {
+    "route": {
+      "queues": [
+        { "queue": "IT Support", "score": 0.82 },
+        { "queue": "Technical Support", "score": 0.12 },
+        { "queue": "Customer Service", "score": 0.04 }
+      ],
+      "searched": ["IT Support"],
+      "fallback_global": false
+    },
+    "top_similarity": 0.86,
+    "k": 5
+  },
+  "precedents": [
+    {
+      "ticket_id": "TKT-01842",
+      "similarity": 0.86,
+      "language": "en",
+      "type": "Request",
+      "queue": "IT Support",
+      "priority": "medium",
+      "subject": "Password reset link not arriving",
+      "answer_snippet": "Reset emails can take up to 10 minutes to arrive and are often filtered as spam. Please check your spam or junk folder before requesting another link.",
+      "tags": ["password", "email", "account"]
+    },
+    {
+      "ticket_id": "TKT-03317",
+      "similarity": 0.81,
+      "language": "en",
+      "type": "Request",
+      "queue": "IT Support",
+      "priority": "medium",
+      "subject": "Locked out after too many attempts",
+      "answer_snippet": "After verifying the account owner, we triggered a manual password reset from the admin console and the customer could sign in again.",
+      "tags": ["password", "login"]
+    },
+    {
+      "ticket_id": "TKT-07702",
+      "similarity": 0.77,
+      "language": "de",
+      "type": "Request",
+      "queue": "IT Support",
+      "priority": "low",
+      "subject": "Passwort zurücksetzen funktioniert nicht",
+      "answer_snippet": "Der Link zum Zurücksetzen lag im Spam-Ordner. Nach dem Verschieben in den Posteingang konnte der Kunde das Passwort ändern.",
+      "tags": ["passwort", "e-mail"]
+    }
+  ],
+  "gate": { "decision": "AUTO_DRAFT", "reasons": [] },
+  "draft": {
+    "language": "en",
+    "text": "Hello,\n\nThanks for reaching out. Reset emails can take up to 10 minutes to arrive and are often filtered as spam, so please check your spam or junk folder first [TKT-01842]. If nothing arrives, reply to this ticket and we will start a manual reset after verifying your account [TKT-03317].\n\nBest regards,\nSupport Team",
+    "citations": ["TKT-01842", "TKT-03317"],
+    "mode": "generated",
+    "validation": {
+      "passed": true,
+      "citations_ok": true,
+      "numbers_ok": true,
+      "language_ok": true,
+      "retries": 0,
+      "issues": []
+    }
+  },
+  "burst": null,
+  "latency_ms": {
+    "gateway": 4.1,
+    "language": 2.8,
+    "classify": 17.6,
+    "retrieve": 141.9,
+    "gate": 0.9,
+    "draft": 1462.3,
+    "validate": 21.7,
+    "total": 1655.0
+  },
+  "warnings": []
+}

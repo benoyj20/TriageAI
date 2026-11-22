@@ -1,0 +1,65 @@
+{
+  "metrics_source": "holdout_eval",
+  "generated_at": "2026-11-21T19:30:31+00:00",
+  "reproduce": "python -m ml.split && python -m ml.train && python -m ml.evaluate && python -m ml.latency",
+  "architecture": {
+    "classifier": "TF-IDF (word + char n-grams) + logistic regression per head, temperature-calibrated on kb_val",
+    "embeddings": "OpenAI text-embedding-3-small, 768 dims (Gemini gemini-embedding-2 if no OpenAI key)",
+    "vector_store": "Redis Query Engine, HNSW cosine; hierarchical: queue routing, then KNN inside the routed queues",
+    "llm_draft_model": "OpenAI gpt-5.4-mini, then Gemini, then extractive fallback; every draft validated"
+  },
+  "holdout_benchmark": {
+    "eval_sample_size": 8034,
+    "kb_size": 32133,
+    "blend_weight": 0.5,
+    "metrics": {
+      "type_macro_f1": 0.8941,
+      "type_weighted_f1": 0.8899,
+      "type_accuracy": 0.891,
+      "type_ece": 0.0587,
+      "queue_macro_f1": 0.6391,
+      "queue_weighted_f1": 0.6545,
+      "queue_accuracy": 0.6553,
+      "queue_ece": 0.1288,
+      "priority_macro_f1": 0.704,
+      "priority_weighted_f1": 0.7166,
+      "priority_accuracy": 0.7176,
+      "priority_ece": 0.1128,
+      "high_priority_incident_recall": 0.87,
+      "high_priority_incident_precision": 0.5338,
+      "high_priority_incident_flag_rate": 0.2966,
+      "high_priority_incident_support": 1462,
+      "high_priority_incident_rule": "argmax_type",
+      "alternative_rule_recall": 0.9337,
+      "alternative_rule_precision": 0.436
+    },
+    "latency": {
+      "language_ms": null,
+      "triage_inference_per_ticket_ms": null,
+      "precedent_retrieval_ms": null,
+      "grounded_synthesis_ms": null,
+      "total_e2e_latency_ms": null
+    }
+  },
+  "safety_gate_policy": {
+    "high_priority_threshold": 0.26,
+    "incident_threshold": null,
+    "confidence_floor": 0.42,
+    "precedent_similarity_threshold": 0.35,
+    "p1_codes": [
+      "HIGH_PRIORITY_INCIDENT",
+      "SECURITY_INCIDENT",
+      "ACTIVE_OUTAGE"
+    ],
+    "p2_codes": [
+      "LEGAL_OR_COMPLIANCE",
+      "PROMPT_INJECTION",
+      "NO_PRECEDENT",
+      "LOW_CONFIDENCE",
+      "UNSUPPORTED_REQUEST",
+      "UNGROUNDED_DRAFT",
+      "UNSUPPORTED_LANGUAGE",
+      "ENGINE_DEGRADED"
+    ]
+  }
+}

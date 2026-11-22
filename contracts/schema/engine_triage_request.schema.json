@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "POST /v1/triage body (Go gateway -> Python engine). Text is already PII-masked.\n\nThe gateway always sends request_id, ticket_id and created_at. The defaults exist\nonly so teammates can call the engine directly while developing.",
+  "properties": {
+    "request_id": {
+      "anyOf": [
+        {
+          "maxLength": 64,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Request Id"
+    },
+    "ticket_id": {
+      "anyOf": [
+        {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Ticket Id"
+    },
+    "subject": {
+      "default": "",
+      "maxLength": 700,
+      "title": "Subject",
+      "type": "string"
+    },
+    "body": {
+      "maxLength": 12000,
+      "minLength": 1,
+      "title": "Body",
+      "type": "string"
+    },
+    "created_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Created At"
+    }
+  },
+  "required": [
+    "body"
+  ],
+  "title": "EngineTriageRequest",
+  "type": "object"
+}

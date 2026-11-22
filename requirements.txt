@@ -1,0 +1,5 @@
+# Python environment for the engine, the ML pipeline, the evaluation scripts and the tests.
+#   pip install -r requirements.txt      (Python 3.11+, from the repo root)
+-r engine/requirements.txt
+-r engine/requirements-dev.txt
+-r ml/requirements.txt

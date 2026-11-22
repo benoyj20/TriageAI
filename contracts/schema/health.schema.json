@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "GET /api/v1/health",
+  "properties": {
+    "status": {
+      "enum": [
+        "ok",
+        "degraded",
+        "down"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "mode": {
+      "enum": [
+        "live",
+        "mock"
+      ],
+      "title": "Mode",
+      "type": "string"
+    },
+    "contract_version": {
+      "title": "Contract Version",
+      "type": "string"
+    },
+    "components": {
+      "additionalProperties": {
+        "enum": [
+          "ok",
+          "down",
+          "stub",
+          "unknown"
+        ],
+        "type": "string"
+      },
+      "description": "gateway, engine, vector_db.",
+      "title": "Components",
+      "type": "object"
+    }
+  },
+  "required": [
+    "status",
+    "mode",
+    "contract_version",
+    "components"
+  ],
+  "title": "GatewayHealth",
+  "type": "object"
+}

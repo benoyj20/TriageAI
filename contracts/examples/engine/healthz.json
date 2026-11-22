@@ -1,0 +1,14 @@
+{
+  "status": "ok",
+  "contract_version": "1.0",
+  "stages": {
+    "language": "real",
+    "global_search": "real",
+    "classify": "real",
+    "route_and_search": "real",
+    "draft": "real",
+    "validate": "real",
+    "gate": "real"
+  },
+  "components": { "vector_db": "ok", "llm": "ok", "artifacts": "ok" }
+}

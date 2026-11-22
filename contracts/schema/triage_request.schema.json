@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "POST /api/v1/triage body (console -> Go gateway). Unknown fields are ignored.",
+  "properties": {
+    "subject": {
+      "anyOf": [
+        {
+          "maxLength": 500,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Subject"
+    },
+    "body": {
+      "maxLength": 10000,
+      "minLength": 1,
+      "title": "Body",
+      "type": "string"
+    },
+    "ticket_id": {
+      "anyOf": [
+        {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Optional client id. The gateway assigns LIVE-XXXXXXXX when it is absent.",
+      "title": "Ticket Id"
+    }
+  },
+  "required": [
+    "body"
+  ],
+  "title": "TriageRequest",
+  "type": "object"
+}

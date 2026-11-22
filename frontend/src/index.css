@@ -1,0 +1,106 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", system-ui, -apple-system, Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* Brand: tactile cyber-navy header, bright teal/haem accents */
+  --color-brand-950: #081a28;
+  --color-brand-900: #0f273e;
+  --color-brand-800: #143554;
+  --color-brand-700: #1a446c;
+  --color-brand-600: #255d91;
+  --color-brand-100: #e0f2fe;
+  --color-brand-50: #f0f9ff;
+
+  /* Warm beige work surface with cream cards */
+  --color-page: #f3ece0;
+  --color-card: #fffcf6;
+  --color-sand: #f6efe3;
+  --color-sand-2: #efe6d7;
+  --color-sand-3: #e5dac7;
+  --color-line: #e6dccb;
+  --color-line-dark: #d4c7b2;
+  --color-ink: #14171f;
+  --color-ink-2: #343a46;
+  --color-ink-3: #666f7d;
+
+  --color-cyber: #0d9488;
+  --color-cyber-light: #ccfbf1;
+  --color-haem: #164e63;
+  --color-eosin: #c93a63;
+
+  /* Chart tokens */
+  --color-series-1: #0d9488;
+  --color-chart-grid: #ebe2d3;
+  --color-chart-axis: #cdbfa8;
+  --color-chart-muted: #8492a6;
+
+  /* Elevation */
+  --shadow-sentinel-sm: 0 1px 2px rgb(20 23 31 / 0.05), 0 1px 3px rgb(20 23 31 / 0.03);
+  --shadow-sentinel-md: 0 4px 16px -4px rgb(20 23 31 / 0.08), 0 2px 6px -2px rgb(20 23 31 / 0.04);
+}
+
+html, body, #root { height: 100%; }
+body {
+  background: var(--color-page);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-mono { font-family: var(--font-mono); }
+.tabular { font-variant-numeric: tabular-nums; }
+
+.thin-scroll { scrollbar-width: thin; scrollbar-color: #d4c7b2 transparent; }
+
+@keyframes pulse-dot {
+  0% { transform: scale(0.85); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); }
+  70% { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+  100% { transform: scale(0.85); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+.animate-pulse-dot { animation: pulse-dot 2.4s infinite cubic-bezier(0.16, 1, 0.3, 1); }
+
+@keyframes slide-in { from { transform: translateX(100%); } to { transform: translateX(0); } }
+.animate-slide-in { animation: slide-in 180ms ease-out; }
+
+/* Live triage: one orchestrated sequence, each effect tied to a pipeline stage */
+@keyframes lab-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.lab-in { animation: lab-in 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+
+@keyframes lab-grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.lab-grow { transform-origin: left; animation: lab-grow 900ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+
+@keyframes lab-scan { from { transform: translateY(-100%); } to { transform: translateY(400%); } }
+.lab-scan { position: relative; overflow: hidden; }
+.lab-scan::after {
+  content: ''; position: absolute; inset: 0 0 auto 0; height: 30%;
+  background: linear-gradient(to bottom, transparent, rgb(45 212 191 / 0.22), transparent);
+  animation: lab-scan 1.3s linear infinite; pointer-events: none;
+}
+
+@keyframes lab-redact { to { background-size: 100% 100%; color: #000; } }
+.lab-redact {
+  background-image: linear-gradient(#000, #000); background-repeat: no-repeat; background-size: 0% 100%;
+  border-radius: 3px; animation: lab-redact 520ms cubic-bezier(0.6, 0, 0.4, 1) forwards;
+}
+
+@keyframes lab-flare-red { 0% { box-shadow: 0 0 0 0 rgb(239 68 68 / 0.7); } 100% { box-shadow: 0 0 0 14px rgb(239 68 68 / 0); } }
+@keyframes lab-flare-amber { 0% { box-shadow: 0 0 0 0 rgb(251 191 36 / 0.7); } 100% { box-shadow: 0 0 0 14px rgb(251 191 36 / 0); } }
+.lab-flare-red { animation: lab-in 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both, lab-flare-red 900ms ease-out both; }
+.lab-flare-amber { animation: lab-in 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both, lab-flare-amber 900ms ease-out both; }
+
+@keyframes lab-caret { 50% { opacity: 0; } }
+.lab-caret { animation: lab-caret 900ms step-end infinite; }
+
+@keyframes lab-stamp { from { opacity: 0; transform: scale(1.12); } to { opacity: 1; transform: none; } }
+.lab-stamp { animation: lab-stamp 380ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-slide-in, .animate-pulse-dot, .lab-in, .lab-grow, .lab-flare-red, .lab-flare-amber, .lab-caret, .lab-stamp { animation: none; }
+  .lab-scan::after { display: none; }
+  .lab-redact { animation: none; background-size: 100% 100%; color: #000; }
+}
+

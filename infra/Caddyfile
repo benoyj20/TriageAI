@@ -1,0 +1,6 @@
+# HTTPS for the API. Caddy gets and renews the Let's Encrypt certificate itself.
+# API_DOMAIN (e.g. api.example.com) must have a DNS A record pointing at the EC2 public IP.
+{$API_DOMAIN} {
+	encode gzip
+	reverse_proxy gateway:8080
+}

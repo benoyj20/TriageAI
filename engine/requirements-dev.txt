@@ -1,0 +1,4 @@
+# Tests: python -m pytest (from the repo root)
+pytest>=8
+httpx>=0.27
+jsonschema>=4.20

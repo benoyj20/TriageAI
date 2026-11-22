@@ -1,0 +1,127 @@
+{
+  "contract_version": "1.0",
+  "request_id": "req_0e6b5d2f91a4",
+  "ticket_id": "LIVE-B2D7E640",
+  "subject": "Desktop app crashes on startup after update",
+  "body": "Since this morning's update the desktop app closes immediately after the splash screen. Reinstalling did not help.",
+  "created_at": "2026-11-21T11:30:05Z",
+  "processed_at": "2026-11-21T11:30:13.188Z",
+  "language": { "code": "en", "confidence": 0.99, "supported": true },
+  "pii": { "masked": [] },
+  "classification": {
+    "type": {
+      "label": "Problem",
+      "confidence": 0.64,
+      "probs": { "Problem": 0.64, "Incident": 0.27, "Request": 0.07, "Change": 0.02 }
+    },
+    "queue": {
+      "label": "Technical Support",
+      "confidence": 0.46,
+      "probs": {
+        "Technical Support": 0.46,
+        "Product Support": 0.38,
+        "IT Support": 0.09,
+        "Customer Service": 0.04,
+        "General Inquiry": 0.02
+      },
+      "votes": 2,
+      "k": 5
+    },
+    "priority": {
+      "label": "medium",
+      "confidence": 0.58,
+      "probs": { "high": 0.22, "medium": 0.58, "low": 0.2 },
+      "p_high": 0.22
+    }
+  },
+  "retrieval": {
+    "route": {
+      "queues": [
+        { "queue": "Technical Support", "score": 0.52 },
+        { "queue": "Product Support", "score": 0.39 },
+        { "queue": "IT Support", "score": 0.06 }
+      ],
+      "searched": ["Technical Support", "Product Support"],
+      "fallback_global": true
+    },
+    "top_similarity": 0.83,
+    "k": 5
+  },
+  "precedents": [
+    {
+      "ticket_id": "TKT-00718",
+      "similarity": 0.83,
+      "language": "en",
+      "type": "Problem",
+      "queue": "IT Support",
+      "priority": "medium",
+      "subject": "App crashes after update",
+      "answer_snippet": "Updating to the latest version and restarting the application resolved the crash. If it persists, we ask for the app version and a screenshot of the error.",
+      "tags": ["app", "crash", "update"]
+    },
+    {
+      "ticket_id": "TKT-03602",
+      "similarity": 0.74,
+      "language": "en",
+      "type": "Problem",
+      "queue": "Technical Support",
+      "priority": "medium",
+      "subject": "Sync not working on desktop client",
+      "answer_snippet": "Signing out and back in rebuilt the local cache and sync resumed.",
+      "tags": ["sync", "desktop"]
+    },
+    {
+      "ticket_id": "TKT-05947",
+      "similarity": 0.71,
+      "language": "de",
+      "type": "Problem",
+      "queue": "Product Support",
+      "priority": "low",
+      "subject": "Installation schlägt unter Windows fehl",
+      "answer_snippet": "Die Installation lief durch, nachdem der Kunde das Installationsprogramm als Administrator gestartet hatte.",
+      "tags": ["installation", "windows"]
+    }
+  ],
+  "gate": {
+    "decision": "HUMAN_REVIEW",
+    "reasons": [
+      {
+        "code": "ENGINE_DEGRADED",
+        "severity": "P2",
+        "detail": "Generative LLM service unavailable; fallback extractor invoked"
+      }
+    ]
+  },
+  "draft": {
+    "language": "en",
+    "text": "Hello,\n\nA similar case [TKT-00718] was resolved as follows: Updating to the latest version and restarting the application resolved the crash. If it persists, we ask for the app version and a screenshot of the error.\n\nBest regards,\nSupport Team",
+    "citations": ["TKT-00718"],
+    "mode": "extractive",
+    "validation": {
+      "passed": true,
+      "citations_ok": true,
+      "numbers_ok": true,
+      "language_ok": true,
+      "retries": 0,
+      "issues": []
+    }
+  },
+  "burst": null,
+  "latency_ms": {
+    "gateway": 3.9,
+    "language": 2.7,
+    "classify": 18.1,
+    "retrieve": 149.6,
+    "gate": 0.8,
+    "draft": 8003.4,
+    "validate": 0.6,
+    "total": 8183.5
+  },
+  "warnings": [
+    {
+      "stage": "draft",
+      "code": "LLM_TIMEOUT",
+      "message": "Gemini did not answer within 8 s; extractive fallback used."
+    }
+  ]
+}

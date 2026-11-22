@@ -1,0 +1,6 @@
+{
+  "status": "ok",
+  "mode": "live",
+  "contract_version": "1.0",
+  "components": { "gateway": "ok", "engine": "ok", "vector_db": "ok" }
+}

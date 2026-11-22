@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "GET /healthz on the engine",
+  "properties": {
+    "status": {
+      "enum": [
+        "ok",
+        "degraded",
+        "down"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "contract_version": {
+      "title": "Contract Version",
+      "type": "string"
+    },
+    "stages": {
+      "additionalProperties": {
+        "enum": [
+          "real",
+          "stub"
+        ],
+        "type": "string"
+      },
+      "title": "Stages",
+      "type": "object"
+    },
+    "components": {
+      "additionalProperties": {
+        "enum": [
+          "ok",
+          "down",
+          "stub",
+          "unknown"
+        ],
+        "type": "string"
+      },
+      "description": "vector_db, llm, artifacts.",
+      "title": "Components",
+      "type": "object"
+    }
+  },
+  "required": [
+    "status",
+    "contract_version",
+    "stages",
+    "components"
+  ],
+  "title": "EngineHealth",
+  "type": "object"
+}

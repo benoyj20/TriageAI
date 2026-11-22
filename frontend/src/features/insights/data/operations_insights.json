@@ -1,0 +1,62 @@
+{
+  "dataset_name": "Tobi-Bueck/customer-support-tickets (full EN/DE)",
+  "source_file": "aa_dataset-tickets-multi-lang-5-2-50-version.csv",
+  "generated_at": "2026-11-21T17:13:10+00:00",
+  "verify_command": "python3 analytics/verify_operations_insights.py",
+  "total_volume": 28587,
+  "languages": {
+    "counts": {
+      "en": 16338,
+      "de": 12249
+    },
+    "percentages": {
+      "en": 57.2,
+      "de": 42.8
+    }
+  },
+  "queues": {
+    "Technical Support": 8362,
+    "Product Support": 5252,
+    "Customer Service": 4268,
+    "IT Support": 3433,
+    "Billing and Payments": 2788,
+    "Returns and Exchanges": 1437,
+    "Service Outages and Maintenance": 1148,
+    "Sales and Pre-Sales": 918,
+    "Human Resources": 576,
+    "General Inquiry": 405
+  },
+  "priorities": {
+    "medium": 11515,
+    "high": 11178,
+    "low": 5894
+  },
+  "types": {
+    "Incident": 11466,
+    "Request": 8187,
+    "Problem": 6012,
+    "Change": 2922
+  },
+  "critical_outages": {
+    "total_count": 4931,
+    "percentage": 17.25,
+    "by_queue": {
+      "Technical Support": 2560,
+      "Product Support": 684,
+      "IT Support": 620,
+      "Service Outages and Maintenance": 436,
+      "Customer Service": 228,
+      "Billing and Payments": 214,
+      "Returns and Exchanges": 117,
+      "Human Resources": 31,
+      "General Inquiry": 25,
+      "Sales and Pre-Sales": 16
+    }
+  },
+  "text_telemetry": {
+    "avg_subject_chars": 38.5,
+    "avg_body_chars": 387.3,
+    "avg_answer_chars": 387.2,
+    "null_subject_pct": 13.43
+  }
+}

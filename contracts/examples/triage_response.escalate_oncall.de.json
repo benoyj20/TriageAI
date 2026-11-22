@@ -1,0 +1,133 @@
+{
+  "contract_version": "1.0",
+  "request_id": "req_a81d3f06c2e9",
+  "ticket_id": "LIVE-9C04B7D1",
+  "subject": "VPN ausgefallen – Telemedizin in allen Kliniken unterbrochen",
+  "body": "Seit 07:40 Uhr können sich unsere Standorte nicht mehr über das VPN verbinden. Telemedizin-Sprechstunden und der Zugriff auf die Patientenakte (EMR) sind unterbrochen. Bitte dringend prüfen. Rückruf unter [PHONE_1].",
+  "created_at": "2026-11-21T07:52:30Z",
+  "processed_at": "2026-11-21T07:52:31.940Z",
+  "language": { "code": "de", "confidence": 0.99, "supported": true },
+  "pii": { "masked": [{ "type": "PHONE", "count": 1 }] },
+  "classification": {
+    "type": {
+      "label": "Incident",
+      "confidence": 0.93,
+      "probs": { "Incident": 0.93, "Problem": 0.05, "Request": 0.01, "Change": 0.01 }
+    },
+    "queue": {
+      "label": "Service Outages and Maintenance",
+      "confidence": 0.61,
+      "probs": {
+        "Service Outages and Maintenance": 0.61,
+        "Technical Support": 0.22,
+        "IT Support": 0.11,
+        "Product Support": 0.03,
+        "Customer Service": 0.02
+      },
+      "votes": 4,
+      "k": 5
+    },
+    "priority": {
+      "label": "high",
+      "confidence": 0.88,
+      "probs": { "high": 0.88, "medium": 0.1, "low": 0.02 },
+      "p_high": 0.88
+    }
+  },
+  "retrieval": {
+    "route": {
+      "queues": [
+        { "queue": "Service Outages and Maintenance", "score": 0.68 },
+        { "queue": "Technical Support", "score": 0.24 },
+        { "queue": "IT Support", "score": 0.07 }
+      ],
+      "searched": ["Service Outages and Maintenance", "Technical Support"],
+      "fallback_global": false
+    },
+    "top_similarity": 0.84,
+    "k": 5
+  },
+  "precedents": [
+    {
+      "ticket_id": "TKT-02210",
+      "similarity": 0.84,
+      "language": "en",
+      "type": "Incident",
+      "queue": "Service Outages and Maintenance",
+      "priority": "high",
+      "subject": "VPN gateway down for all remote staff",
+      "answer_snippet": "The VPN concentrator had stopped accepting new sessions. We failed over to the standby node, all sites reconnected, and we asked sites to restart their VPN client.",
+      "tags": ["vpn", "outage", "network"]
+    },
+    {
+      "ticket_id": "TKT-04471",
+      "similarity": 0.8,
+      "language": "de",
+      "type": "Incident",
+      "queue": "Technical Support",
+      "priority": "high",
+      "subject": "VPN-Verbindung bricht ständig ab",
+      "answer_snippet": "Wir haben das Problem an das Bereitschaftsteam eskaliert. Nach einem Neustart des VPN-Clients an den betroffenen Standorten war die Verbindung wieder stabil.",
+      "tags": ["vpn", "netzwerk"]
+    },
+    {
+      "ticket_id": "TKT-06013",
+      "similarity": 0.76,
+      "language": "de",
+      "type": "Incident",
+      "queue": "Service Outages and Maintenance",
+      "priority": "high",
+      "subject": "Klinik-Netzwerk nicht erreichbar",
+      "answer_snippet": "Ein fehlerhaftes Firmware-Update am Router war die Ursache. Das Update wurde zurückgerollt und der Zugriff auf die Patientenakte wiederhergestellt.",
+      "tags": ["netzwerk", "klinik", "router"]
+    }
+  ],
+  "gate": {
+    "decision": "ESCALATE_ONCALL",
+    "reasons": [
+      {
+        "code": "ACTIVE_OUTAGE",
+        "severity": "P1",
+        "detail": "Ticket correlated with active incident cluster 'BURST-VPN-SERVICE' (3 tickets in rolling window)"
+      },
+      {
+        "code": "HIGH_PRIORITY_INCIDENT",
+        "severity": "P1",
+        "detail": "Type=Incident and P(High)=88.0% exceeds tuned recall threshold (38.0%)"
+      }
+    ]
+  },
+  "draft": {
+    "language": "de",
+    "text": "Guten Tag,\n\nvielen Dank für Ihre schnelle Meldung. Wir haben die Störung an unser Bereitschaftsteam eskaliert [TKT-04471]. Bitte starten Sie den VPN-Client an einem betroffenen Standort neu und teilen Sie uns mit, ob alle Standorte betroffen sind [TKT-02210].\n\nMit freundlichen Grüßen\nIhr Support-Team",
+    "citations": ["TKT-04471", "TKT-02210"],
+    "mode": "generated",
+    "validation": {
+      "passed": true,
+      "citations_ok": true,
+      "numbers_ok": true,
+      "language_ok": true,
+      "retries": 0,
+      "issues": []
+    }
+  },
+  "burst": {
+    "cluster_id": "BURST-VPN-SERVICE",
+    "queue": "Service Outages and Maintenance",
+    "lead_term": "vpn",
+    "ticket_count": 3,
+    "first_seen": "2026-11-21T07:49:02Z",
+    "last_seen": "2026-11-21T07:52:31Z"
+  },
+  "latency_ms": {
+    "gateway": 3.7,
+    "language": 3.1,
+    "classify": 19.4,
+    "retrieve": 156.2,
+    "gate": 1.2,
+    "draft": 1718.5,
+    "validate": 24.9,
+    "total": 1931.4
+  },
+  "warnings": []
+}

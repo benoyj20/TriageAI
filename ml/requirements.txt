@@ -1,0 +1,9 @@
+pandas>=2.2
+numpy>=1.26
+scikit-learn>=1.5
+joblib>=1.4
+langdetect>=1.0.9
+huggingface_hub>=0.24
+redis>=5.0
+google-genai>=1.0
+pytest>=8

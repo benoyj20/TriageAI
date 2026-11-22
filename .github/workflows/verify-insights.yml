@@ -1,0 +1,30 @@
+name: Verify insights JSON
+
+on:
+  push:
+    paths:
+      - 'analytics/**'
+      - 'frontend/src/features/insights/data/**'
+  pull_request:
+    paths:
+      - 'analytics/**'
+      - 'frontend/src/features/insights/data/**'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: .
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pandas
+        run: pip install pandas huggingface_hub
+      # The dataset CSV is gitignored; fetch the pinned revision the Reports data was built from.
+      - name: Download dataset
+        run: python3 -c "from huggingface_hub import hf_hub_download as d; from ml import config as C; d(C.HF_REPO, C.PRIMARY_FILE, repo_type='dataset', revision=C.HF_REVISION, local_dir='ml/artifacts/raw')"
+      - name: DA-02 operations insights verify
+        run: python3 analytics/verify_operations_insights.py

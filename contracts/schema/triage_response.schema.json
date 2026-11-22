@@ -1,0 +1,775 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "Burst": {
+      "additionalProperties": false,
+      "properties": {
+        "cluster_id": {
+          "title": "Cluster Id",
+          "type": "string"
+        },
+        "queue": {
+          "title": "Queue",
+          "type": "string"
+        },
+        "lead_term": {
+          "title": "Lead Term",
+          "type": "string"
+        },
+        "ticket_count": {
+          "minimum": 1,
+          "title": "Ticket Count",
+          "type": "integer"
+        },
+        "first_seen": {
+          "format": "date-time",
+          "title": "First Seen",
+          "type": "string"
+        },
+        "last_seen": {
+          "format": "date-time",
+          "title": "Last Seen",
+          "type": "string"
+        }
+      },
+      "required": [
+        "cluster_id",
+        "queue",
+        "lead_term",
+        "ticket_count",
+        "first_seen",
+        "last_seen"
+      ],
+      "title": "Burst",
+      "type": "object"
+    },
+    "Classification": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/TypeHead"
+        },
+        "queue": {
+          "$ref": "#/$defs/QueueHead"
+        },
+        "priority": {
+          "$ref": "#/$defs/PriorityHead"
+        }
+      },
+      "required": [
+        "type",
+        "queue",
+        "priority"
+      ],
+      "title": "Classification",
+      "type": "object"
+    },
+    "Draft": {
+      "additionalProperties": false,
+      "properties": {
+        "language": {
+          "enum": [
+            "en",
+            "de"
+          ],
+          "title": "Language",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "citations": {
+          "description": "Every [TKT-xxxxx] in text, in order of first use.",
+          "items": {
+            "pattern": "^TKT-\\d{5}$",
+            "type": "string"
+          },
+          "title": "Citations",
+          "type": "array"
+        },
+        "mode": {
+          "enum": [
+            "generated",
+            "extractive",
+            "holding"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "validation": {
+          "$ref": "#/$defs/Validation"
+        }
+      },
+      "required": [
+        "language",
+        "text",
+        "citations",
+        "mode",
+        "validation"
+      ],
+      "title": "Draft",
+      "type": "object"
+    },
+    "Gate": {
+      "additionalProperties": false,
+      "properties": {
+        "decision": {
+          "enum": [
+            "ESCALATE_ONCALL",
+            "HUMAN_REVIEW",
+            "AUTO_DRAFT"
+          ],
+          "title": "Decision",
+          "type": "string"
+        },
+        "reasons": {
+          "items": {
+            "$ref": "#/$defs/GateReason"
+          },
+          "title": "Reasons",
+          "type": "array"
+        }
+      },
+      "required": [
+        "decision",
+        "reasons"
+      ],
+      "title": "Gate",
+      "type": "object"
+    },
+    "GateReason": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "enum": [
+            "HIGH_PRIORITY_INCIDENT",
+            "SECURITY_INCIDENT",
+            "ACTIVE_OUTAGE",
+            "LEGAL_OR_COMPLIANCE",
+            "PROMPT_INJECTION",
+            "NO_PRECEDENT",
+            "LOW_CONFIDENCE",
+            "UNSUPPORTED_REQUEST",
+            "UNGROUNDED_DRAFT",
+            "UNSUPPORTED_LANGUAGE",
+            "ENGINE_DEGRADED"
+          ],
+          "title": "Code",
+          "type": "string"
+        },
+        "severity": {
+          "enum": [
+            "P1",
+            "P2"
+          ],
+          "title": "Severity",
+          "type": "string"
+        },
+        "detail": {
+          "title": "Detail",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "severity",
+        "detail"
+      ],
+      "title": "GateReason",
+      "type": "object"
+    },
+    "GatewayLatency": {
+      "additionalProperties": false,
+      "properties": {
+        "language": {
+          "minimum": 0.0,
+          "title": "Language",
+          "type": "number"
+        },
+        "classify": {
+          "minimum": 0.0,
+          "title": "Classify",
+          "type": "number"
+        },
+        "retrieve": {
+          "description": "Query embedding + global search + routing + level-2 search.",
+          "minimum": 0.0,
+          "title": "Retrieve",
+          "type": "number"
+        },
+        "gate": {
+          "description": "Gate rules + burst detection.",
+          "minimum": 0.0,
+          "title": "Gate",
+          "type": "number"
+        },
+        "draft": {
+          "minimum": 0.0,
+          "title": "Draft",
+          "type": "number"
+        },
+        "validate": {
+          "minimum": 0.0,
+          "title": "Validate",
+          "type": "number"
+        },
+        "total": {
+          "description": "Wall time; at least the sum of the stages.",
+          "minimum": 0.0,
+          "title": "Total",
+          "type": "number"
+        },
+        "gateway": {
+          "description": "Gateway's own time: validation, PII masking, IDs.",
+          "minimum": 0.0,
+          "title": "Gateway",
+          "type": "number"
+        }
+      },
+      "required": [
+        "language",
+        "classify",
+        "retrieve",
+        "gate",
+        "draft",
+        "validate",
+        "total",
+        "gateway"
+      ],
+      "title": "GatewayLatency",
+      "type": "object"
+    },
+    "Language": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "pattern": "^([a-z]{2}|unknown)$",
+          "title": "Code",
+          "type": "string"
+        },
+        "confidence": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "supported": {
+          "description": "True only for en and de.",
+          "title": "Supported",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "code",
+        "confidence",
+        "supported"
+      ],
+      "title": "Language",
+      "type": "object"
+    },
+    "Pii": {
+      "additionalProperties": false,
+      "properties": {
+        "masked": {
+          "items": {
+            "$ref": "#/$defs/PiiCount"
+          },
+          "title": "Masked",
+          "type": "array"
+        }
+      },
+      "required": [
+        "masked"
+      ],
+      "title": "Pii",
+      "type": "object"
+    },
+    "PiiCount": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": [
+            "EMAIL",
+            "PHONE",
+            "IP",
+            "IBAN",
+            "CARD",
+            "ACCOUNT"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "count": {
+          "minimum": 1,
+          "title": "Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "type",
+        "count"
+      ],
+      "title": "PiiCount",
+      "type": "object"
+    },
+    "Precedent": {
+      "additionalProperties": false,
+      "properties": {
+        "ticket_id": {
+          "pattern": "^TKT-\\d{5}$",
+          "title": "Ticket Id",
+          "type": "string"
+        },
+        "similarity": {
+          "maximum": 1.0,
+          "minimum": -1.0,
+          "title": "Similarity",
+          "type": "number"
+        },
+        "language": {
+          "pattern": "^([a-z]{2}|unknown)$",
+          "title": "Language",
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "Incident",
+            "Request",
+            "Problem",
+            "Change"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "queue": {
+          "title": "Queue",
+          "type": "string"
+        },
+        "priority": {
+          "enum": [
+            "high",
+            "medium",
+            "low"
+          ],
+          "title": "Priority",
+          "type": "string"
+        },
+        "subject": {
+          "title": "Subject",
+          "type": "string"
+        },
+        "answer_snippet": {
+          "description": "First ~300 characters of the agent's answer.",
+          "maxLength": 400,
+          "title": "Answer Snippet",
+          "type": "string"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array"
+        }
+      },
+      "required": [
+        "ticket_id",
+        "similarity",
+        "language",
+        "type",
+        "queue",
+        "priority",
+        "subject",
+        "answer_snippet"
+      ],
+      "title": "Precedent",
+      "type": "object"
+    },
+    "PriorityHead": {
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "enum": [
+            "high",
+            "medium",
+            "low"
+          ],
+          "title": "Label",
+          "type": "string"
+        },
+        "confidence": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "probs": {
+          "additionalProperties": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "type": "number"
+          },
+          "description": "high, medium and low.",
+          "title": "Probs",
+          "type": "object"
+        },
+        "p_high": {
+          "description": "Calibrated P(high); the gate compares it to the recall-tuned threshold.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "P High",
+          "type": "number"
+        }
+      },
+      "required": [
+        "label",
+        "confidence",
+        "probs",
+        "p_high"
+      ],
+      "title": "PriorityHead",
+      "type": "object"
+    },
+    "QueueHead": {
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "confidence": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "probs": {
+          "additionalProperties": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "type": "number"
+          },
+          "description": "Top 5 queues.",
+          "title": "Probs",
+          "type": "object"
+        },
+        "votes": {
+          "description": "Neighbours among the global top-k that share label.",
+          "minimum": 0,
+          "title": "Votes",
+          "type": "integer"
+        },
+        "k": {
+          "description": "Neighbours that voted.",
+          "minimum": 0,
+          "title": "K",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "label",
+        "confidence",
+        "probs",
+        "votes",
+        "k"
+      ],
+      "title": "QueueHead",
+      "type": "object"
+    },
+    "QueueScore": {
+      "additionalProperties": false,
+      "properties": {
+        "queue": {
+          "title": "Queue",
+          "type": "string"
+        },
+        "score": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Score",
+          "type": "number"
+        }
+      },
+      "required": [
+        "queue",
+        "score"
+      ],
+      "title": "QueueScore",
+      "type": "object"
+    },
+    "Retrieval": {
+      "additionalProperties": false,
+      "properties": {
+        "route": {
+          "$ref": "#/$defs/Route"
+        },
+        "top_similarity": {
+          "description": "Similarity of precedents[0]; 0 when there are none.",
+          "maximum": 1.0,
+          "minimum": -1.0,
+          "title": "Top Similarity",
+          "type": "number"
+        },
+        "k": {
+          "description": "Maximum number of precedents returned.",
+          "maximum": 20,
+          "minimum": 1,
+          "title": "K",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "route",
+        "top_similarity",
+        "k"
+      ],
+      "title": "Retrieval",
+      "type": "object"
+    },
+    "Route": {
+      "additionalProperties": false,
+      "properties": {
+        "queues": {
+          "description": "Level-1 queue scores, best first (top 3).",
+          "items": {
+            "$ref": "#/$defs/QueueScore"
+          },
+          "title": "Queues",
+          "type": "array"
+        },
+        "searched": {
+          "description": "Queues the level-2 search ran in.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Searched",
+          "type": "array"
+        },
+        "fallback_global": {
+          "description": "True when the precedents come from the global search instead.",
+          "title": "Fallback Global",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "queues",
+        "searched",
+        "fallback_global"
+      ],
+      "title": "Route",
+      "type": "object"
+    },
+    "StageWarning": {
+      "additionalProperties": false,
+      "properties": {
+        "stage": {
+          "title": "Stage",
+          "type": "string"
+        },
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        }
+      },
+      "required": [
+        "stage",
+        "code",
+        "message"
+      ],
+      "title": "StageWarning",
+      "type": "object"
+    },
+    "TypeHead": {
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "enum": [
+            "Incident",
+            "Request",
+            "Problem",
+            "Change"
+          ],
+          "title": "Label",
+          "type": "string"
+        },
+        "confidence": {
+          "description": "Calibrated probability of label; equals probs[label].",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "probs": {
+          "additionalProperties": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "type": "number"
+          },
+          "description": "All four types.",
+          "title": "Probs",
+          "type": "object"
+        }
+      },
+      "required": [
+        "label",
+        "confidence",
+        "probs"
+      ],
+      "title": "TypeHead",
+      "type": "object"
+    },
+    "Validation": {
+      "additionalProperties": false,
+      "properties": {
+        "passed": {
+          "description": "citations_ok and numbers_ok and language_ok.",
+          "title": "Passed",
+          "type": "boolean"
+        },
+        "citations_ok": {
+          "title": "Citations Ok",
+          "type": "boolean"
+        },
+        "numbers_ok": {
+          "title": "Numbers Ok",
+          "type": "boolean"
+        },
+        "language_ok": {
+          "title": "Language Ok",
+          "type": "boolean"
+        },
+        "retries": {
+          "maximum": 2,
+          "minimum": 0,
+          "title": "Retries",
+          "type": "integer"
+        },
+        "issues": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Issues",
+          "type": "array"
+        }
+      },
+      "required": [
+        "passed",
+        "citations_ok",
+        "numbers_ok",
+        "language_ok",
+        "retries",
+        "issues"
+      ],
+      "title": "Validation",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Gateway -> console. The gateway adds pii and latency_ms.gateway and recomputes total.",
+  "properties": {
+    "contract_version": {
+      "const": "1.0",
+      "title": "Contract Version",
+      "type": "string"
+    },
+    "request_id": {
+      "title": "Request Id",
+      "type": "string"
+    },
+    "ticket_id": {
+      "title": "Ticket Id",
+      "type": "string"
+    },
+    "subject": {
+      "description": "PII-masked; empty string when there was no subject.",
+      "title": "Subject",
+      "type": "string"
+    },
+    "body": {
+      "description": "PII-masked.",
+      "title": "Body",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "processed_at": {
+      "format": "date-time",
+      "title": "Processed At",
+      "type": "string"
+    },
+    "language": {
+      "$ref": "#/$defs/Language"
+    },
+    "classification": {
+      "$ref": "#/$defs/Classification"
+    },
+    "retrieval": {
+      "$ref": "#/$defs/Retrieval"
+    },
+    "precedents": {
+      "description": "Best first. Can be empty (NO_PRECEDENT).",
+      "items": {
+        "$ref": "#/$defs/Precedent"
+      },
+      "title": "Precedents",
+      "type": "array"
+    },
+    "gate": {
+      "$ref": "#/$defs/Gate"
+    },
+    "draft": {
+      "$ref": "#/$defs/Draft"
+    },
+    "burst": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Burst"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "latency_ms": {
+      "$ref": "#/$defs/GatewayLatency"
+    },
+    "warnings": {
+      "items": {
+        "$ref": "#/$defs/StageWarning"
+      },
+      "title": "Warnings",
+      "type": "array"
+    },
+    "pii": {
+      "$ref": "#/$defs/Pii"
+    }
+  },
+  "required": [
+    "contract_version",
+    "request_id",
+    "ticket_id",
+    "subject",
+    "body",
+    "created_at",
+    "processed_at",
+    "language",
+    "classification",
+    "retrieval",
+    "precedents",
+    "gate",
+    "draft",
+    "burst",
+    "latency_ms",
+    "pii"
+  ],
+  "title": "TriageResponse",
+  "type": "object"
+}

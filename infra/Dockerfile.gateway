@@ -1,0 +1,18 @@
+# Go gateway image (API only). Build from the repo root:
+#   docker build -f infra/Dockerfile.gateway -t sentineldesk-gateway .
+#
+# The console is deployed separately on Vercel, which proxies /api/* to this gateway
+# (frontend/vercel.json), so the browser never makes a cross-origin call.
+# The gateway still serves the Insights JSON from INSIGHTS_DIR.
+
+FROM golang:1.22-alpine AS build
+WORKDIR /src
+COPY backend/ .
+RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/api ./cmd/api
+
+FROM gcr.io/distroless/static-debian12:nonroot
+COPY --from=build /out/api /api
+COPY analytics/insights /insights
+ENV PORT=8080 WEB_DIR="" INSIGHTS_DIR=/insights
+EXPOSE 8080
+ENTRYPOINT ["/api"]
