@@ -2,7 +2,9 @@
 
 <img src="docs/media/demo.gif" alt="TriageAI live triage: an English hospital VPN-outage ticket has its phone number masked, is classified as a high-priority incident, matched to five past tickets, gated, and escalated to on-call with the draft held" width="880">
 
-# TriageAI · 🥈 2nd Place, GDG Cloud Boston x Northeastern Hackathon
+# TriageAI
+
+### 🥈 2nd Place · GDG Cloud Boston x Northeastern University Hackathon, November 2026
 
 **Incident triage that explains itself.** Every incoming support ticket is classified, gated, matched against
 resolved precedents and answered with a drafted reply that cites the past tickets it used. It works in English
