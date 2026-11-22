@@ -2,7 +2,7 @@
 
 <img src="docs/media/demo.gif" alt="TriageAI live triage: a German hospital VPN-outage ticket is masked, classified as an incident, matched to five past tickets, gated, and escalated to on-call with a held German draft" width="880">
 
-# TriageAI
+# TriageAI · 🥈 2nd Place, GDG Cloud Boston x Northeastern Hackathon
 
 **Incident triage that explains itself.** Every incoming support ticket is classified, gated, matched against
 resolved precedents and answered with a drafted reply that cites the past tickets it used. It works in English
@@ -16,9 +16,6 @@ and German, and a human sees why each decision was made.
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](infra)
 [![Leakage audit](https://img.shields.io/badge/leakage%20audit-7%2F7%20checks-0b6b5e)](qa/LEAKAGE_AUDIT.md)
 [![2nd place](https://img.shields.io/badge/%F0%9F%A5%88%202nd%20place-GDG%20Cloud%20Boston%20x%20Northeastern%20Hackathon-6b7280)](#award)
-
-🥈 **Second prize** at the
-[GDG Cloud Boston x Northeastern University Hackathon](https://gdg.community.dev/events/details/google-gdg-boston-presents-gdg-cloud-boston-x-northeastern-university-hackathon/)
 
 **[Watch the demo video](https://youtu.be/UBkSEnIPQRM)** &nbsp;·&nbsp; **[Run it locally](#run-it-locally)**
 
