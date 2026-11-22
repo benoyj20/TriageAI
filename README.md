@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/media/demo.gif" alt="TriageAI live triage: an English hospital VPN-outage ticket has its phone number masked, is classified as a high-priority incident, matched to five past tickets, gated, and escalated to on-call with the draft held" width="880">
+<img src="docs/media/demo.gif" alt="TriageAI live triage: an English hospital VPN-outage ticket has its phone number masked, is classified as an incident, matched to five past tickets, gated as a high-priority incident, and escalated to on-call with the draft held" width="880">
 
 # TriageAI
 
@@ -80,8 +80,8 @@ shows the real time of every stage on every ticket.
 <table>
   <tr>
     <td width="50%" valign="top">
-      <img src="docs/media/triage-pipeline.png" alt="Live triage: the phone number is masked, the language is detected as English and the ticket is classified as a high-priority incident"><br>
-      <b>Live triage.</b> Language, type, queue and priority with confidence. The phone number is masked first.
+      <img src="docs/media/triage-pipeline.png" alt="Live triage: the language is detected as English and the classifier card shows type Incident with queue and priority confidences"><br>
+      <b>Live triage.</b> Language, type, queue and priority, each with a calibrated confidence.
     </td>
     <td width="50%" valign="top">
       <img src="docs/media/safety-gate.png" alt="Five similar past tickets retrieved and the safety gate showing a high-priority incident rule fired"><br>
@@ -94,14 +94,14 @@ shows the real time of every stage on every ticket.
       <b>Grounded draft.</b> The reply cites real tickets, passes the check, and waits for a person.
     </td>
     <td width="50%" valign="top">
-      <img src="docs/media/pii-masking.png" alt="A ticket with card number, IBAN, email and phone; the gateway reports four pieces of personal data hidden"><br>
-      <b>PII guardrail.</b> Card, IBAN, email and phone are masked before the engine sees anything.
+      <img src="docs/media/pii-masking.png" alt="The gateway card reports one piece of personal data hidden: the phone number is replaced by PHONE_1 before the engine sees the text"><br>
+      <b>PII guardrail.</b> Phones, emails, cards and IBANs are masked before the engine or any model sees the text.
     </td>
   </tr>
   <tr>
     <td width="50%" valign="top">
-      <img src="docs/media/auto-send.png" alt="A routine password-reset ticket where all eleven rules pass, shown as Ready to send"><br>
-      <b>Routine, handled.</b> All eleven rules pass and the reply is ready to send untouched.
+      <img src="docs/media/board.png" alt="Board with Incoming, Escalated on-call, Human review, Draft ready and Resolved columns; the new hospital ticket is highlighted in the escalated column"><br>
+      <b>Board.</b> Every ticket by workflow stage. Drag a card when work moves on.
     </td>
     <td width="50%" valign="top">
       <img src="docs/media/outage-overview.png" alt="Overview with a red major-incident banner and several escalated VPN tickets in English and German"><br>
