@@ -112,8 +112,8 @@ shows the real time of every stage on every ticket.
 </table>
 
 <p align="center">
-  <img src="docs/media/insights.png" alt="Reports page: of 100 real high-priority tickets, 85 go on-call and 15 are missed, with type, priority and language breakdowns" width="880"><br>
-  <sub><b>Reports.</b> Of 100 real high-priority incidents, 85 are escalated. The console shows the trade-off openly.</sub>
+  <img src="docs/media/reports.png" alt="Reports page: of 100 real high-priority incidents, 87 go on-call and 13 are missed at 53% precision, with type, priority and language breakdowns" width="880"><br>
+  <sub><b>Reports.</b> Of 100 real high-priority incidents, 87 are escalated. The console shows the trade-off openly.</sub>
 </p>
 
 ## What makes it different
