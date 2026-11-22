@@ -19,7 +19,7 @@ and German, and a human sees why each decision was made.
 [![Leakage audit](https://img.shields.io/badge/leakage%20audit-7%2F7%20checks-0b6b5e)](qa/LEAKAGE_AUDIT.md)
 [![2nd place](https://img.shields.io/badge/%F0%9F%A5%88%202nd%20place-GDG%20Cloud%20Boston%20x%20Northeastern%20Hackathon-6b7280)](#award)
 
-**[Watch the demo video](https://youtu.be/UBkSEnIPQRM)** &nbsp;·&nbsp; **[Run it locally](#run-it-locally)**
+**[Watch the demo video](https://youtu.be/neZXzgZFY9s)** &nbsp;·&nbsp; **[Run it locally](#run-it-locally)**
 
 </div>
 
