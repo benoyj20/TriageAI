@@ -60,6 +60,7 @@ ErrorCode = Literal[
     "ENGINE_BAD_RESPONSE",
     "INTERNAL",
     "NOT_FOUND",
+    "METHOD_NOT_ALLOWED",
 ]
 HealthStatus = Literal["ok", "degraded", "down"]
 ComponentStatus = Literal["ok", "down", "stub", "unknown"]

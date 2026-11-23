@@ -32,9 +32,11 @@ class FakeRedis:
     def zadd(self, key, mapping):
         self.z.setdefault(key, {}).update(mapping)
 
-    def zrevrange(self, key, start, end):
-        ids = sorted(self.z.get(key, {}), key=lambda k: self.z[key][k], reverse=True)
-        return [i.encode() for i in ids[start : end + 1]]
+    def zrevrange(self, key, start, end, withscores=False):
+        ids = sorted(self.z.get(key, {}), key=lambda k: self.z[key][k], reverse=True)[start : end + 1]
+        if withscores:
+            return [(i.encode(), float(self.z[key][i])) for i in ids]
+        return [i.encode() for i in ids]
 
     def zremrangebyrank(self, *a):
         return 0
@@ -82,6 +84,14 @@ def test_submitted_tickets_reach_the_manager_list_newest_first(client):
     assert [i["ticket_id"] for i in items] == [b["ticket_id"], a["ticket_id"]]
     assert items[0]["status"] == "escalated" and items[1]["status"] == "review"
     assert items[0]["gate"]["decision"] == "ESCALATE_ONCALL"
+
+
+def test_tickets_created_in_the_same_clock_tick_keep_arrival_order():
+    r = FakeRedis()
+    same = "2026-11-22T10:00:00+00:00"
+    for tid in ("LIVE-BBBB", "LIVE-AAAA", "LIVE-CCCC"):  # ids deliberately not in arrival order
+        assert ticket_store.save({"ticket_id": tid, "created_at": same, "gate": {"decision": "HUMAN_REVIEW"}}, client=r)
+    assert [t["ticket_id"] for t in ticket_store.recent(client=r)] == ["LIVE-CCCC", "LIVE-AAAA", "LIVE-BBBB"]
 
 
 def test_creator_status_view_reveals_nothing_internal(client):

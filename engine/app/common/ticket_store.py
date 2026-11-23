@@ -27,6 +27,7 @@ log = logging.getLogger("sentineldesk.tickets")
 
 TTL_SECONDS = 7 * 24 * 3600
 MAX_TICKETS = 2000
+TIE_WINDOW_S = 0.05  # creation times this close to the newest ticket count as the same moment
 STATUSES = ("new", "escalated", "review", "drafted", "resolved")
 STATUS_FROM_DECISION = {"ESCALATE_ONCALL": "escalated", "HUMAN_REVIEW": "review", "AUTO_DRAFT": "drafted"}
 INDEX = "live:tickets"
@@ -60,7 +61,12 @@ def save(result: dict[str, Any], client: Any = None) -> bool:
     try:
         c = _client(client)
         created = datetime.fromisoformat(str(result["created_at"]).replace("Z", "+00:00")).timestamp()
-        status = STATUS_FROM_DECISION.get(result.get("gate", {}).get("decision", ""), "new")
+        # Tickets created within one clock tick (about 16 ms on Windows) would tie, and Redis orders ties by
+        # id, not arrival. Keep arrival order by placing the newer ticket just above the current newest.
+        top = c.zrevrange(INDEX, 0, 0, withscores=True)
+        if top and _text(top[0][0]) != tid and 0 <= float(top[0][1]) - created < TIE_WINDOW_S:
+            created = float(top[0][1]) + 0.001
+        status =STATUS_FROM_DECISION.get(result.get("gate", {}).get("decision", ""), "new")
         pipe = c.pipeline(transaction=False)
         pipe.set(_key("ticket", tid), json.dumps(result, ensure_ascii=False), ex=TTL_SECONDS)
         pipe.set(_key("status", tid), status, ex=TTL_SECONDS, nx=True)

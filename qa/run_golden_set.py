@@ -37,7 +37,7 @@ IP_RE = re.compile(r"\b(?:\d{1,3}\.){3}\d{1,3}\b")
 
 
 def simulate_policy_decision(ticket):
-    """Fallback local policy decision evaluator simulating contract v1 gate rules."""
+    """Local policy decision evaluator simulating contract v1 gate rules (used when no --endpoint is given)."""
     text = (ticket.get("subject") or "") + " " + (ticket.get("body") or "")
     text_lower = text.lower()
     reasons = []
@@ -137,10 +137,8 @@ def main():
         purpose = tc.get("test_purpose", "")[:35]
 
         if args.endpoint:
+            # A request error counts as a failure: never substitute the local simulation for the real engine.
             act_dec, act_reasons = test_remote_endpoint(args.endpoint, tc)
-            if act_dec is None:
-                # If remote fails, fallback to local audit
-                act_dec, act_reasons = simulate_policy_decision(tc)
         else:
             act_dec, act_reasons = simulate_policy_decision(tc)
 
@@ -152,14 +150,17 @@ def main():
             failed += 1
             status = "❌ FAIL"
 
-        print(f"{tid:<9} | {lang:<4} | {exp_dec:<16} | {act_dec:<16} | {status:<7} | {purpose}")
+        shown = act_dec if act_dec is not None else "ERROR"
+        print(f"{tid:<9} | {lang:<4} | {exp_dec:<16} | {shown:<16} | {status:<7} | {purpose}")
+        if act_dec is None:
+            print(f"          request failed: {act_reasons[0] if act_reasons else 'no response'}")
 
     print(f"\n{'-'*82}")
     pct = (passed / len(cases)) * 100
     print(f"Summary: {passed}/{len(cases)} Passed ({pct:.1f}%) | {failed} Failed")
 
     if failed == 0:
-        print("🎉 Result: ALL 30 GOLDEN TEST TICKETS PASSED CONTRACT INVARIANTS!\n")
+        print(f"🎉 Result: ALL {len(cases)} GOLDEN TEST TICKETS PASSED CONTRACT INVARIANTS!\n")
         sys.exit(0)
     else:
         print(f"⚠️ Result: {failed} test ticket(s) failed expected outcome.\n")

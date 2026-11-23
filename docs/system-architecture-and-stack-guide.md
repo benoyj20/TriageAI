@@ -117,8 +117,9 @@ the console through the gateway. Stage-by-stage detail and the data split and ga
 ## 5. Architectural Trade-offs & Rationale
 
 1. **Why Hierarchical RAG instead of Flat Search?**
-   * *Problem*: In a flat index (42,675 rows here), cross-queue semantic noise causes IT infrastructure tickets to retrieve irrelevant billing answers.
-   * *Solution*: Routing to the top 2 of 10 queues first (classifier probability blended with queue centroids) keeps precedents inside the predicted queues, with a global fallback when the routed match is weak. On `kb_val` it matches flat search on useful@1 (0.72 vs 0.73, `ml/artifacts/reports/v1/retrieval_quality.json`) and falls back to global for about 29% of queries.
+   * *Goal*: Precedents from the queue the ticket belongs to, and a retrieval step a reviewer can follow. Every response reports the queues it searched and whether it fell back to global search.
+   * *Design*: Route to the top 2 of 10 queues first (75% classifier probability, 25% queue-centroid similarity), run kNN (k = 5) inside them, and fall back to the global top 5 when the routed top match trails the global one by more than 0.05.
+   * *Measured trade-off*: On `kb_val` (3,213 queries, `ml/artifacts/reports/v1/retrieval_quality.json`) routing picks the right queue 72% of the time. The fallback, used for about 29% of queries, recovers most misses, so useful@1 ends level with flat search (0.72 vs 0.73). Hierarchical retrieval is kept for the queue-scoped, explainable results, not for higher accuracy.
 2. **Why Redis over External Cloud Vector DBs (Pinecone/Weaviate)?**
    * *Problem*: Cloud vector databases add 80–150ms HTTP network round-trips and external vendor dependencies.
    * *Solution*: Self-hosted Redis in Docker (on EC2 for the hackathon, localhost now) runs in memory, supports atomic `HINCRBY` counters, and backs up cleanly via RDB snapshots.

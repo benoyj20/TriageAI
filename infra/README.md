@@ -39,7 +39,7 @@ The image is pinned (`redis/redis-stack:7.4.0-v8`; EC2 uses `redis/redis-stack-s
 
 This was the hackathon deployment. The project now runs locally (see the root [`README.md`](../README.md#run-it-locally)); these steps and the deploy files are kept for reference. The full write-up is [`docs/DEPLOYMENT.md`](../docs/DEPLOYMENT.md).
 
-One-time box setup (Ubuntu 22.04+, t3.large, 30 GB disk):
+One-time box setup (Ubuntu 24.04, t3.medium, 30 GB disk):
 
 1. Security group: allow **80** and **443** (Caddy, automatic HTTPS) from anywhere, **22** from your IP only. Never open 6379, 8000 or 8001.
 2. Install Docker: `curl -fsSL https://get.docker.com | sudo sh && sudo usermod -aG docker $USER`, then log out and back in.

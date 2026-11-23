@@ -14,7 +14,8 @@
             "ENGINE_TIMEOUT",
             "ENGINE_BAD_RESPONSE",
             "INTERNAL",
-            "NOT_FOUND"
+            "NOT_FOUND",
+            "METHOD_NOT_ALLOWED"
           ],
           "title": "Code",
           "type": "string"

@@ -108,6 +108,8 @@ Every non-200 response from the gateway or the engine has this body:
 | Status | `code` | When |
 |---|---|---|
 | 400 | `INVALID_JSON` | The body isn't valid JSON |
+| 404 | `NOT_FOUND` | Unknown `/api/` path, or a ticket or insights file that doesn't exist |
+| 405 | `METHOD_NOT_ALLOWED` | Wrong method on a known path, e.g. `GET /api/v1/triage` |
 | 413 | `PAYLOAD_TOO_LARGE` | The request is over 64 KiB |
 | 422 | `VALIDATION_ERROR` | A field breaks the rules above |
 | 429 | `RATE_LIMITED` | Too many requests from one client |

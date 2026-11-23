@@ -9,14 +9,16 @@
 
 ## 🎯 1. Quality Objectives & Quality Gates
 
-The TriageAI platform must meet the following strict non-negotiable quality gates before hackathon submission:
+The TriageAI platform is held to the following quality gates. Where a script measures the value, the measured result is shown:
 
-| Quality Gate | Metric / Invariant | Threshold | Validation Method |
+| Quality Gate | Metric / Invariant | Threshold / Measured | Validation Method |
 | :--- | :--- | :--- | :--- |
-| **P1 On-Call Recall** | High Priority Incidents escalated | **≥ 98.0%** | `qa/run_golden_set.py` |
+| **P1 On-Call Recall** | High-priority incidents escalated on the 8,034-ticket holdout | Measured **0.870** recall at 0.534 precision (default rule); 0.934 with the recall-tuned rule | `python -m ml.evaluate --blend` |
+| **Golden-Set Decisions** | Each golden ticket gets its expected gate decision | **30 / 30** | `qa/run_golden_set.py --endpoint <url>` |
 | **Zero PII Leakage** | Plaintext PII leaving perimeter | **0 occurrences** | Gateway unit tests & regex audit |
 | **Zero Data Leakage** | Holdout test set contamination in KB | **0% overlap** | `qa/audit_leakage.py` |
-| **End-to-End Latency** | Pipeline P95 response time | **< 400 ms** | `ml/latency.py` & gateway telemetry |
+| **Model Latency** | Offline p95 per ticket (n = 300) | Measured **4.2 ms** language detection, **10.9 ms** classification | `python -m ml.latency` |
+| **End-to-End Latency** | Per-stage and total time for every request | Reported in `latency_ms` on each response (the LLM draft dominates) | Gateway + engine telemetry |
 | **Hallucination Bound** | Unverified claims in Auto-Drafts | **0 ungrounded** | Hallucination rubric (`QA-06`) |
 | **Null-Safety** | Missing / empty / whitespace subjects | **Zero 500 crashes** | Golden set tickets `GOLD-15`..`GOLD-19` |
 
