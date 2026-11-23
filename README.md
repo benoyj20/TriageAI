@@ -146,15 +146,9 @@ Keyboard friendly: `/` focuses search, `Esc` closes dialogs, `←` `→` step th
 
 ## Architecture
 
-```mermaid
-flowchart LR
-    U([Ticket creator / incident manager]) --> F["<b>Console</b><br/>React · Vite · Tailwind"]
-    F --> G["<b>Gateway</b> :8080<br/>Go · validate · rate limit<br/>PII masking · timing"]
-    G --> E["<b>Engine</b> :8000 (private)<br/>Python · FastAPI<br/>language → embed → classify<br/>→ route + search → draft<br/>→ validate → gate + burst"]
-    E --> R[("<b>Redis</b><br/>KB index · HNSW cosine")]
-    E -. "embeddings + drafts" .-> L["OpenAI → Gemini<br/>→ extractive fallback"]
-    E --> O[["Decision: escalate · review · ready<br/>+ reason codes + citations"]]
-```
+<p align="center">
+  <img src="docs/media/architecture.svg" alt="TriageAI architecture: a ticket goes from the React console to the public Go gateway (validation, rate limiting, PII masking), then to the private Python engine, which runs seven stages (detect language, embed, classify, route, draft, validate, gate) using Redis vector search and OpenAI, then Gemini, then an extractive fallback. The gate returns ESCALATE_ONCALL, HUMAN_REVIEW or AUTO_DRAFT with reason codes and citations." width="880">
+</p>
 
 | Part | Choice |
 | :--- | :--- |

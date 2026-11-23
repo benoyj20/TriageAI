@@ -1,0 +1,237 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="730" viewBox="0 0 960 730" role="img" aria-labelledby="t d">
+  <title id="t">TriageAI architecture</title>
+  <desc id="d">A ticket goes from the console to the public Go gateway, which validates it and masks PII, then to the private Python engine. The engine runs seven stages: detect language, embed, classify, route, draft, validate and gate. It looks up precedents in Redis and calls OpenAI, then Gemini, then an extractive fallback for drafts. The gate returns one of three decisions: escalate to on-call, human review, or auto draft.</desc>
+
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b1120"/>
+      <stop offset="1" stop-color="#101a2f"/>
+    </linearGradient>
+    <pattern id="dots" width="22" height="22" patternUnits="userSpaceOnUse">
+      <circle cx="1.5" cy="1.5" r="1" fill="#1c2840"/>
+    </pattern>
+    <linearGradient id="flow" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#38bdf8"/>
+      <stop offset="0.55" stop-color="#2dd4bf"/>
+      <stop offset="1" stop-color="#fbbf24"/>
+    </linearGradient>
+    <linearGradient id="badge" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#5eead4"/>
+      <stop offset="1" stop-color="#2dd4bf"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="7" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <marker id="a-slate" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="a-violet" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#a78bfa"/>
+    </marker>
+    <marker id="a-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#f87171"/>
+    </marker>
+    <marker id="a-pink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#f0abfc"/>
+    </marker>
+    <style>
+      text { font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif; }
+      .mono { font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace; }
+      .h { font-size: 15px; font-weight: 700; fill: #f1f5f9; }
+      .s { font-size: 12px; fill: #cbd5e1; }
+      .m { font-size: 11.5px; fill: #8b9bb4; }
+      .lbl { font-size: 10.5px; fill: #8b9bb4; }
+      .card { fill: #131c31; stroke: #26334f; stroke-width: 1; }
+      .chip { fill: #132036; stroke: #284063; stroke-width: 1; }
+      .cn { font-size: 13px; font-weight: 700; fill: #f1f5f9; }
+      .num { font-size: 11px; font-weight: 800; fill: #0b1120; }
+    </style>
+  </defs>
+
+  <!-- background -->
+  <rect width="960" height="730" rx="22" fill="url(#bg)"/>
+  <rect width="960" height="730" rx="22" fill="url(#dots)" opacity="0.7"/>
+  <circle cx="820" cy="300" r="190" fill="#2dd4bf" opacity="0.05"/>
+  <circle cx="120" cy="640" r="160" fill="#38bdf8" opacity="0.04"/>
+
+  <!-- header -->
+  <text x="40" y="46" font-size="12" font-weight="700" letter-spacing="3" fill="#2dd4bf">ARCHITECTURE</text>
+  <text x="40" y="76" font-size="23" font-weight="700" fill="#f8fafc">One ticket, from submission to a decision</text>
+  <text x="920" y="76" text-anchor="end" class="m">English + German · grounded in 32,133 resolved tickets</text>
+
+  <!-- row 1: people → console → gateway -->
+  <g>
+    <rect x="40" y="104" width="190" height="84" rx="12" class="card"/>
+    <rect x="40" y="104" width="4" height="84" rx="2" fill="#94a3b8"/>
+    <circle cx="70" cy="146" r="15" fill="#1e293b" stroke="#94a3b8"/>
+    <circle cx="70" cy="141" r="4.5" fill="#cbd5e1"/>
+    <path d="M61,154 a9,7 0 0 1 18,0" fill="#cbd5e1"/>
+    <text x="96" y="136" class="h">People</text>
+    <text x="96" y="157" class="s">Ticket creators</text>
+    <text x="96" y="174" class="s">Incident managers</text>
+  </g>
+
+  <line x1="232" y1="146" x2="316" y2="146" stroke="#94a3b8" stroke-width="2" marker-end="url(#a-slate)"/>
+  <text x="274" y="138" text-anchor="middle" class="lbl">ticket</text>
+
+  <g>
+    <rect x="320" y="104" width="250" height="84" rx="12" class="card"/>
+    <rect x="320" y="104" width="4" height="84" rx="2" fill="#38bdf8"/>
+    <text x="342" y="136" class="h">Console</text>
+    <text x="342" y="157" class="s">React 19 · Vite · Tailwind</text>
+    <text x="342" y="174" class="m">help desk + incident views</text>
+  </g>
+
+  <line x1="572" y1="146" x2="656" y2="146" stroke="#94a3b8" stroke-width="2" marker-end="url(#a-slate)"/>
+  <text x="614" y="138" text-anchor="middle" class="lbl mono">/v1/triage</text>
+
+  <g>
+    <rect x="660" y="104" width="260" height="84" rx="12" class="card"/>
+    <rect x="660" y="104" width="4" height="84" rx="2" fill="#a78bfa"/>
+    <text x="682" y="136" class="h">Gateway</text>
+    <text x="752" y="136" class="mono" font-size="13" fill="#a78bfa">:8080</text>
+    <rect x="852" y="120" width="54" height="18" rx="9" fill="#a78bfa" opacity="0.16"/>
+    <text x="879" y="133" text-anchor="middle" font-size="9.5" font-weight="700" letter-spacing="1" fill="#c4b5fd">PUBLIC</text>
+    <text x="682" y="157" class="s">Go · validate · rate limit</text>
+    <text x="682" y="174" class="m">PII masking · request timing</text>
+  </g>
+
+  <!-- private boundary (engine + redis; LLMs sit outside) -->
+  <path d="M24,232 H936 V414 H484 V540 H24 Z" fill="#2dd4bf" fill-opacity="0.025" stroke="#2dd4bf" stroke-opacity="0.45" stroke-width="1.2" stroke-dasharray="6 6" stroke-linejoin="round"/>
+  <rect x="36" y="224" width="132" height="17" rx="4" fill="#0d1527"/>
+  <text x="44" y="236.5" font-size="10" font-weight="700" letter-spacing="2" fill="#5eead4">PRIVATE NETWORK</text>
+
+  <!-- gateway → engine -->
+  <line x1="790" y1="190" x2="790" y2="248" stroke="#a78bfa" stroke-width="2" marker-end="url(#a-violet)"/>
+  <text x="800" y="214" class="lbl" fill="#c4b5fd">masked ticket</text>
+
+  <!-- engine -->
+  <rect x="40" y="252" width="880" height="146" rx="14" fill="#0f1b2e" stroke="#1f5552" stroke-width="1.2"/>
+  <text x="60" y="281" class="h">Engine</text>
+  <text x="118" y="281" class="mono" font-size="13" fill="#2dd4bf">:8000</text>
+  <text x="172" y="281" class="m">Python · FastAPI</text>
+  <text x="900" y="281" text-anchor="end" class="m">7 stages, one pass</text>
+
+  <line x1="80" y1="340" x2="880" y2="340" stroke="url(#flow)" stroke-width="2.5" opacity="0.9"/>
+
+  <!-- chips: x = 58 + i*122, w = 112 -->
+  <g>
+    <rect x="58" y="296" width="112" height="86" rx="10" class="chip"/>
+    <circle cx="76" cy="316" r="10" fill="#38bdf8"/><text x="76" y="320" text-anchor="middle" class="num">1</text>
+    <text x="92" y="321" class="cn">Detect</text>
+    <text x="72" y="348" class="s">language</text>
+    <text x="72" y="365" class="m">en / de</text>
+  </g>
+  <g>
+    <rect x="180" y="296" width="112" height="86" rx="10" class="chip"/>
+    <circle cx="198" cy="316" r="10" fill="#38bdf8"/><text x="198" y="320" text-anchor="middle" class="num">2</text>
+    <text x="214" y="321" class="cn">Embed</text>
+    <text x="194" y="348" class="s">query vector</text>
+    <text x="194" y="365" class="m">global top-10</text>
+  </g>
+  <g>
+    <rect x="302" y="296" width="112" height="86" rx="10" class="chip"/>
+    <circle cx="320" cy="316" r="10" fill="#22d3ee"/><text x="320" y="320" text-anchor="middle" class="num">3</text>
+    <text x="336" y="321" class="cn">Classify</text>
+    <text x="316" y="348" class="s">type · queue</text>
+    <text x="316" y="365" class="m">priority</text>
+  </g>
+  <g>
+    <rect x="424" y="296" width="112" height="86" rx="10" class="chip"/>
+    <circle cx="442" cy="316" r="10" fill="#2dd4bf"/><text x="442" y="320" text-anchor="middle" class="num">4</text>
+    <text x="458" y="321" class="cn">Route</text>
+    <text x="438" y="348" class="s">top queues</text>
+    <text x="438" y="365" class="m">kNN, k = 5</text>
+  </g>
+  <g>
+    <rect x="546" y="296" width="112" height="86" rx="10" class="chip"/>
+    <circle cx="564" cy="316" r="10" fill="#2dd4bf"/><text x="564" y="320" text-anchor="middle" class="num">5</text>
+    <text x="580" y="321" class="cn">Draft</text>
+    <text x="560" y="348" class="s">grounded reply</text>
+    <text x="560" y="365" class="m">or extractive</text>
+  </g>
+  <g>
+    <rect x="668" y="296" width="112" height="86" rx="10" class="chip"/>
+    <circle cx="686" cy="316" r="10" fill="#a3e635"/><text x="686" y="320" text-anchor="middle" class="num">6</text>
+    <text x="702" y="321" class="cn">Validate</text>
+    <text x="682" y="348" class="s">cites, numbers</text>
+    <text x="682" y="365" class="m">one retry</text>
+  </g>
+  <g>
+    <rect x="790" y="296" width="112" height="86" rx="10" fill="#fbbf24" opacity="0.18" filter="url(#glow)"/>
+    <rect x="790" y="296" width="112" height="86" rx="10" fill="#1a2236" stroke="#fbbf24" stroke-opacity="0.75" stroke-width="1.2"/>
+    <circle cx="808" cy="316" r="10" fill="#fbbf24"/><text x="808" y="320" text-anchor="middle" class="num">7</text>
+    <text x="824" y="321" class="cn">Gate</text>
+    <text x="804" y="348" class="s">11 rules</text>
+    <text x="804" y="365" class="m">+ burst check</text>
+  </g>
+
+  <!-- engine ↔ redis -->
+  <line x1="236" y1="384" x2="236" y2="432" stroke="#f87171" stroke-width="1.6" stroke-dasharray="4 4" marker-start="url(#a-red)" marker-end="url(#a-red)"/>
+  <path d="M480,384 V404 H400 V432" fill="none" stroke="#f87171" stroke-width="1.6" stroke-dasharray="4 4" marker-start="url(#a-red)" marker-end="url(#a-red)"/>
+  <text x="246" y="414" class="lbl" fill="#fca5a5">vector search</text>
+
+  <!-- redis -->
+  <g>
+    <rect x="40" y="436" width="420" height="86" rx="12" class="card"/>
+    <rect x="40" y="436" width="4" height="86" rx="2" fill="#f87171"/>
+    <text x="62" y="465" class="h">Redis Query Engine</text>
+    <text x="62" y="487" class="s">42,675 tickets · HNSW cosine · 768-d</text>
+    <text x="62" y="505" class="m">answers only from the 32,133-ticket KB · queue nodes</text>
+  </g>
+
+  <!-- engine ↔ llm -->
+  <line x1="602" y1="384" x2="602" y2="432" stroke="#f0abfc" stroke-width="1.6" stroke-dasharray="4 4" marker-start="url(#a-pink)" marker-end="url(#a-pink)"/>
+  <text x="612" y="428" class="lbl" fill="#f5d0fe">embeddings + drafts</text>
+
+  <!-- llm -->
+  <g>
+    <rect x="520" y="436" width="300" height="86" rx="12" class="card"/>
+    <rect x="520" y="436" width="4" height="86" rx="2" fill="#f0abfc"/>
+    <text x="542" y="465" class="h">LLM providers</text>
+    <rect x="736" y="451" width="68" height="18" rx="9" fill="#f0abfc" opacity="0.14"/>
+    <text x="770" y="464" text-anchor="middle" font-size="9.5" font-weight="700" letter-spacing="1" fill="#f5d0fe">EXTERNAL</text>
+    <text x="542" y="487" class="s">Drafts: gpt-5.4-mini, then Gemini</text>
+    <text x="542" y="505" class="m">Embeddings: text-embedding-3-small</text>
+  </g>
+
+  <!-- gate → decisions -->
+  <path d="M846,384 V566 H180" fill="none" stroke="#94a3b8" stroke-width="2"/>
+  <line x1="180" y1="566" x2="180" y2="580" stroke="#94a3b8" stroke-width="2" marker-end="url(#a-slate)"/>
+  <line x1="480" y1="566" x2="480" y2="580" stroke="#94a3b8" stroke-width="2" marker-end="url(#a-slate)"/>
+  <line x1="780" y1="566" x2="780" y2="580" stroke="#94a3b8" stroke-width="2" marker-end="url(#a-slate)"/>
+  <text x="660" y="557" text-anchor="middle" class="lbl">returned via the gateway with reason codes + citations</text>
+
+  <!-- decisions -->
+  <g>
+    <rect x="40" y="584" width="280" height="92" rx="12" fill="#f87171" fill-opacity="0.08" stroke="#f87171" stroke-opacity="0.6"/>
+    <text x="60" y="613" class="mono" font-size="13" font-weight="700" fill="#fca5a5">ESCALATE_ONCALL</text>
+    <text x="300" y="613" text-anchor="end" font-size="10.5" font-weight="700" fill="#f87171">ANY P1</text>
+    <text x="60" y="638" class="s">outage · security · P1 incident</text>
+    <text x="60" y="657" class="m">routed to on-call · draft held</text>
+  </g>
+  <g>
+    <rect x="340" y="584" width="280" height="92" rx="12" fill="#fbbf24" fill-opacity="0.08" stroke="#fbbf24" stroke-opacity="0.6"/>
+    <text x="360" y="613" class="mono" font-size="13" font-weight="700" fill="#fcd34d">HUMAN_REVIEW</text>
+    <text x="600" y="613" text-anchor="end" font-size="10.5" font-weight="700" fill="#fbbf24">ANY P2</text>
+    <text x="360" y="638" class="s">low confidence · injection · legal</text>
+    <text x="360" y="657" class="m">an agent checks it · draft held</text>
+  </g>
+  <g>
+    <rect x="640" y="584" width="280" height="92" rx="12" fill="#34d399" fill-opacity="0.08" stroke="#34d399" stroke-opacity="0.6"/>
+    <text x="660" y="613" class="mono" font-size="13" font-weight="700" fill="#6ee7b7">AUTO_DRAFT</text>
+    <text x="900" y="613" text-anchor="end" font-size="10.5" font-weight="700" fill="#34d399">NO REASONS</text>
+    <text x="660" y="638" class="s">grounded in cited precedents</text>
+    <text x="660" y="657" class="m">draft ready to send</text>
+  </g>
+
+  <!-- legend -->
+  <line x1="40" y1="704" x2="64" y2="704" stroke="#94a3b8" stroke-width="2"/>
+  <text x="72" y="708" class="lbl">request path</text>
+  <line x1="160" y1="704" x2="184" y2="704" stroke="#94a3b8" stroke-width="1.6" stroke-dasharray="4 4"/>
+  <text x="192" y="708" class="lbl">lookup</text>
+  <rect x="250" y="697" width="22" height="14" rx="3" fill="none" stroke="#2dd4bf" stroke-opacity="0.6" stroke-dasharray="4 3"/>
+  <text x="280" y="708" class="lbl">not reachable from the console</text>
+  <text x="920" y="708" text-anchor="end" class="lbl">Docker Compose (Redis) + local processes</text>
+</svg>

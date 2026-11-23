@@ -1,4 +1,4 @@
-# DA-11: SentinelDesk architecture diagrams
+# DA-11: TriageAI architecture diagrams
 
 **Owner:** Data Analyst. Numbers come from `python -m ml.evaluate` and `qa/audit_leakage.py`; see the root README.
 
@@ -6,83 +6,60 @@
 
 ## 1. End-to-end system
 
-```mermaid
-flowchart TD
-    subgraph Client ["Console"]
-        UI["React + Vite operator console"]
-    end
+<p align="center">
+  <img src="media/architecture.svg" alt="TriageAI architecture: a ticket goes from the React console to the public Go gateway, which validates it, rate-limits and masks PII, then to the private Python engine. The engine runs seven stages (detect language, embed, classify, route, draft, validate, gate) using Redis vector search and OpenAI or Gemini. The gate returns ESCALATE_ONCALL, HUMAN_REVIEW or AUTO_DRAFT with reason codes and citations." width="880">
+</p>
 
-    subgraph Gateway ["Go gateway :8080 (only public service)"]
-        GW["Contract validation, rate limit, IDs, timing"]
-        PII["PII guardrail<br>emails, phones, IPs, IBANs, cards, accounts"]
-        GW --> PII
-    end
+| Stage | What it does | Code |
+| :--- | :--- | :--- |
+| Gateway | Validates the request against contract v1, rate-limits per client, masks emails, phones, IPs, IBANs, cards and account numbers, adds a request ID and timing. 12 s engine timeout. | [`backend/internal/`](../backend/internal) |
+| 1. Detect | Language detection (langdetect + stopword fallback). Only `en` and `de` are supported. | [`engine/app/analyze/language.py`](../engine/app/analyze/language.py) |
+| 2. Embed | Embeds the ticket once and runs an unfiltered global top-10 search in Redis. | [`engine/app/stages_live.py`](../engine/app/stages_live.py) |
+| 3. Classify | TF-IDF + logistic regression per head (type, queue, priority), temperature-calibrated, blended 50/50 with a similarity-weighted vote over the global top-10. | [`engine/app/analyze/classify.py`](../engine/app/analyze/classify.py) |
+| 4. Route | Scores queues (75% classifier probability, 25% queue-centroid similarity), runs kNN (k = 5) inside the top 2 queues. Falls back to the global top 5 when the routed top-1 trails the global top-1 by more than 0.05. | [`engine/app/retrieval/search.py`](../engine/app/retrieval/search.py) |
+| 5. Draft | Grounded reply that cites `[TKT-xxxxx]`. OpenAI `gpt-5.4-mini`, then Gemini; an extractive draft if both fail; a holding reply (no LLM call) when there are no precedents. | [`engine/app/generate/llm.py`](../engine/app/generate/llm.py) |
+| 6. Validate | Checks citations, numbers and language; one retry with the issues fed back. | [`engine/app/generate/validator.py`](../engine/app/generate/validator.py) |
+| 7. Gate | 11 rules plus the outage burst detector; see section 3. | [`engine/app/policy/gate.py`](../engine/app/policy/gate.py) |
 
-    subgraph Engine ["Python engine :8000 (private)"]
-        LANG["1. Language detection (en / de)"]
-        SEARCH["2. Embed query, global top-10"]
-        CLS["3. Classify type, queue, priority<br>TF-IDF + LR, calibrated, + neighbour vote"]
-        ROUTE["4. Route to top queues, KNN k=5 inside them<br>global fallback when weak"]
-        DRAFT["5. Grounded draft, cites [TKT-xxxxx]"]
-        VAL["6. Validate citations, numbers, language<br>one retry with feedback"]
-        GATE["7. Escalation gate (11 rules) + burst detector"]
-        LANG --> SEARCH --> CLS --> ROUTE --> DRAFT --> VAL --> GATE
-    end
-
-    subgraph Data ["Data"]
-        REDIS["Redis Query Engine (private)<br>32,133 KB tickets, HNSW cosine<br>queue nodes + chunks"]
-        LLM["OpenAI gpt-5.4-mini<br>then Gemini, then extractive fallback"]
-        R2["Cloudflare R2<br>splits, embeddings, models, Redis snapshot"]
-    end
-
-    UI -->|"POST /api/v1/triage"| GW
-    PII -->|"masked ticket"| LANG
-    SEARCH <--> REDIS
-    ROUTE <--> REDIS
-    DRAFT <--> LLM
-    GATE -->|"ESCALATE_ONCALL / HUMAN_REVIEW / AUTO_DRAFT<br>+ precedents, draft, latency"| GW --> UI
-```
+Redis holds 42,675 tickets: the 32,133-ticket KB (the only answers ever indexed) plus 10,542 German topic rows
+without answers, and one node per queue. Embeddings come from a single provider per index
+(OpenAI `text-embedding-3-small` at 768 dimensions, or Gemini `gemini-embedding-2` without an OpenAI key); only drafts
+fail over between providers.
 
 The draft is always produced, then held when the gate decides on a person: on-call escalation and human review never send it.
+
+In the hackathon deployment, Cloudflare R2 held the trained classifier, its thresholds and a Redis snapshot; running
+locally does not need it.
 
 ---
 
 ## 2. Data split and leakage controls (ML-03, QA-09)
 
-```mermaid
-flowchart LR
-    RAW["HF dataset, pinned revision<br>primary + 20k file, de-duplicated<br>40,167 tickets"] --> SPLIT["sample(frac=1.0, random_state=42)<br>IDs TKT-00000.., first 80% = KB"]
-    SPLIT --> KB["KB: 32,133<br>(last 10% = kb_val for calibration + thresholds)"]
-    SPLIT --> TEST["Holdout: 8,034"]
-    KB --> INDEX["Redis index + answers<br>(the only answers ever indexed)"]
-    KB --> TRAIN["Classifier training"]
-    TEST --> INPUTS["test_inputs.csv<br>ticket_id, subject, body only"]
-    TEST --> LABELS["test_labels.csv<br>no answer column; read only by ml/evaluate.py"]
-    INPUTS --> EVAL["Holdout report<br>type 0.894, priority 0.704, queue 0.639 macro-F1"]
-    LABELS --> EVAL
-```
+<p align="center">
+  <img src="media/data-split.svg" alt="Data split: the pinned dataset is de-duplicated to 40,167 tickets, shuffled with seed 42 and split 80/20. 32,133 KB tickets feed the Redis index and classifier training (last 10% for calibration and thresholds). 8,034 holdout tickets: inputs go to inference, labels without answers are read only by ml/evaluate.py. Holdout macro-F1: type 0.894, priority 0.704, queue 0.639." width="880">
+</p>
+
+The split, row counts and file hashes are recorded in `ml/artifacts/splits/v1/split_manifest.json`
+([`ml/split.py`](../ml/split.py)). The leakage audit is [`qa/LEAKAGE_AUDIT.md`](../qa/LEAKAGE_AUDIT.md).
 
 ---
 
 ## 3. Escalation gate (DA-06, DA-07)
 
-Any P1 reason → `ESCALATE_ONCALL`. Otherwise any P2 reason → `HUMAN_REVIEW`. No reasons → `AUTO_DRAFT`. All reasons are returned.
+<p align="center">
+  <img src="media/escalation-gate.svg" alt="Escalation gate: any P1 reason (HIGH_PRIORITY_INCIDENT, SECURITY_INCIDENT, ACTIVE_OUTAGE) gives ESCALATE_ONCALL. Otherwise any P2 reason (PROMPT_INJECTION, LEGAL_OR_COMPLIANCE, UNSUPPORTED_REQUEST, LOW_CONFIDENCE, NO_PRECEDENT, UNGROUNDED_DRAFT, UNSUPPORTED_LANGUAGE, ENGINE_DEGRADED) gives HUMAN_REVIEW. No reasons gives AUTO_DRAFT." width="880">
+</p>
 
-```mermaid
-stateDiagram-v2
-    [*] --> CheckP1
-    CheckP1 --> ESCALATE_ONCALL : HIGH_PRIORITY_INCIDENT (Incident and P(high) at or above the tuned threshold)
-    CheckP1 --> ESCALATE_ONCALL : SECURITY_INCIDENT (ransomware, breach, gehackt...)
-    CheckP1 --> ESCALATE_ONCALL : ACTIVE_OUTAGE (3+ related tickets in 10 min)
-    CheckP1 --> CheckP2 : no P1 reason
-    CheckP2 --> HUMAN_REVIEW : PROMPT_INJECTION / LEGAL_OR_COMPLIANCE / UNSUPPORTED_REQUEST
-    CheckP2 --> HUMAN_REVIEW : LOW_CONFIDENCE (below 0.42) / NO_PRECEDENT (top-1 similarity below threshold)
-    CheckP2 --> HUMAN_REVIEW : UNGROUNDED_DRAFT / UNSUPPORTED_LANGUAGE / ENGINE_DEGRADED
-    CheckP2 --> AUTO_DRAFT : no reason
-    ESCALATE_ONCALL --> [*]
-    HUMAN_REVIEW --> [*]
-    AUTO_DRAFT --> [*]
-```
+Where the thresholds come from:
+
+| Threshold | Value | Source |
+| :--- | :--- | :--- |
+| P(high) for `HIGH_PRIORITY_INCIDENT` | 0.26 | `priority_high_threshold` in the model's `thresholds.json`, tuned for 0.9 recall on `kb_val` |
+| `LOW_CONFIDENCE` floor | 0.42 | gate default ([`gate.py`](../engine/app/policy/gate.py)) |
+| `NO_PRECEDENT` top-1 similarity | 0.35 | `no_precedent_threshold`, default in [`stages_live.py`](../engine/app/stages_live.py) |
+| `ACTIVE_OUTAGE` burst | 3 distinct tickets in 5 min | `BURST_MIN_TICKETS` / `BURST_WINDOW_S` ([`burst.py`](../engine/app/policy/burst.py)) |
+
+Reason codes and their wording are frozen in [`contracts/reason_codes.md`](../contracts/reason_codes.md).
 
 ---
 

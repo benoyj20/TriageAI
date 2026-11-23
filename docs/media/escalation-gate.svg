@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="680" viewBox="0 0 960 680" role="img" aria-labelledby="t d">
+  <title id="t">TriageAI escalation gate</title>
+  <desc id="d">All eleven gate rules run on every ticket. Any P1 reason (high-priority incident, security incident, active outage) gives ESCALATE_ONCALL. Otherwise any of the eight P2 reasons gives HUMAN_REVIEW. No reasons gives AUTO_DRAFT. Every matching reason is returned with the decision.</desc>
+
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b1120"/>
+      <stop offset="1" stop-color="#101a2f"/>
+    </linearGradient>
+    <pattern id="dots" width="22" height="22" patternUnits="userSpaceOnUse">
+      <circle cx="1.5" cy="1.5" r="1" fill="#1c2840"/>
+    </pattern>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#94a3b8"/>
+    </marker>
+    <style>
+      text { font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif; }
+      .mono { font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace; }
+      .s { font-size: 11.5px; fill: #cbd5e1; }
+      .m { font-size: 11px; fill: #8b9bb4; }
+      .lbl { font-size: 10.5px; fill: #8b9bb4; }
+      .c1 { fill: #1d1626; stroke: #f87171; stroke-opacity: 0.35; }
+      .c2 { fill: #1c1b1a; stroke: #fbbf24; stroke-opacity: 0.3; }
+      .k1 { font-size: 11.5px; font-weight: 700; fill: #fca5a5; }
+      .k2 { font-size: 10.5px; font-weight: 700; fill: #fcd34d; }
+    </style>
+  </defs>
+
+  <rect width="960" height="680" rx="22" fill="url(#bg)"/>
+  <rect width="960" height="680" rx="22" fill="url(#dots)" opacity="0.7"/>
+
+  <text x="40" y="46" font-size="12" font-weight="700" letter-spacing="3" fill="#fbbf24">ESCALATION GATE</text>
+  <text x="40" y="76" font-size="23" font-weight="700" fill="#f8fafc">Every rule runs; the most severe reason decides</text>
+  <text x="920" y="76" text-anchor="end" class="m">engine/app/policy/gate.py · 11 rules</text>
+
+  <!-- P1 -->
+  <rect x="40" y="104" width="880" height="132" rx="14" fill="#f87171" fill-opacity="0.06" stroke="#f87171" stroke-opacity="0.55"/>
+  <text x="62" y="146" font-size="30" font-weight="800" fill="#f87171">P1</text>
+  <text x="62" y="166" font-size="10" font-weight="700" letter-spacing="1.5" fill="#fca5a5">ANY P1 REASON</text>
+  <rect x="62" y="182" width="176" height="30" rx="8" fill="#f87171" fill-opacity="0.18" stroke="#f87171" stroke-opacity="0.7"/>
+  <text x="150" y="202" text-anchor="middle" class="mono" font-size="12.5" font-weight="800" fill="#fecaca">ESCALATE_ONCALL</text>
+
+  <rect x="270" y="122" width="200" height="96" rx="10" class="c1"/>
+  <text x="284" y="148" class="mono k1">HIGH_PRIORITY_INCIDENT</text>
+  <text x="284" y="174" class="s">type Incident and P(high)</text>
+  <text x="284" y="192" class="m">at or above the tuned 0.26</text>
+
+  <rect x="480" y="122" width="200" height="96" rx="10" class="c1"/>
+  <text x="494" y="148" class="mono k1">SECURITY_INCIDENT</text>
+  <text x="494" y="174" class="s">ransomware, breach,</text>
+  <text x="494" y="192" class="m">gehackt … (EN + DE)</text>
+
+  <rect x="690" y="122" width="210" height="96" rx="10" class="c1"/>
+  <text x="704" y="148" class="mono k1">ACTIVE_OUTAGE</text>
+  <text x="704" y="174" class="s">3+ distinct tickets share</text>
+  <text x="704" y="192" class="m">an outage term in 5 min</text>
+
+  <!-- else -->
+  <line x1="150" y1="238" x2="150" y2="266" stroke="#94a3b8" stroke-width="2" marker-end="url(#a)"/>
+  <text x="162" y="257" class="lbl">no P1 reason</text>
+
+  <!-- P2 -->
+  <rect x="40" y="270" width="880" height="226" rx="14" fill="#fbbf24" fill-opacity="0.05" stroke="#fbbf24" stroke-opacity="0.5"/>
+  <text x="62" y="312" font-size="30" font-weight="800" fill="#fbbf24">P2</text>
+  <text x="62" y="332" font-size="10" font-weight="700" letter-spacing="1.5" fill="#fcd34d">ANY P2 REASON</text>
+  <rect x="62" y="348" width="176" height="30" rx="8" fill="#fbbf24" fill-opacity="0.16" stroke="#fbbf24" stroke-opacity="0.7"/>
+  <text x="150" y="368" text-anchor="middle" class="mono" font-size="12.5" font-weight="800" fill="#fde68a">HUMAN_REVIEW</text>
+
+  <!-- P2 grid: x = 270 + i*159, w = 152 -->
+  <rect x="270" y="288" width="152" height="92" rx="10" class="c2"/>
+  <text x="282" y="312" class="mono k2">PROMPT_INJECTION</text>
+  <text x="282" y="337" class="s">"ignore previous</text>
+  <text x="282" y="355" class="m">instructions" (EN + DE)</text>
+
+  <rect x="429" y="288" width="152" height="92" rx="10" class="c2"/>
+  <text x="441" y="312" class="mono k2">LEGAL_OR_COMPLIANCE</text>
+  <text x="441" y="337" class="s">lawyer, lawsuit,</text>
+  <text x="441" y="355" class="m">GDPR / DSGVO</text>
+
+  <rect x="588" y="288" width="152" height="92" rx="10" class="c2"/>
+  <text x="600" y="312" class="mono k2">UNSUPPORTED_REQUEST</text>
+  <text x="600" y="337" class="s">full refund, payout,</text>
+  <text x="600" y="355" class="m">compensation, LLM flag</text>
+
+  <rect x="747" y="288" width="153" height="92" rx="10" class="c2"/>
+  <text x="759" y="312" class="mono k2">LOW_CONFIDENCE</text>
+  <text x="759" y="337" class="s">calibrated confidence</text>
+  <text x="759" y="355" class="m">below 0.42</text>
+
+  <rect x="270" y="388" width="152" height="92" rx="10" class="c2"/>
+  <text x="282" y="412" class="mono k2">NO_PRECEDENT</text>
+  <text x="282" y="437" class="s">top-1 similarity</text>
+  <text x="282" y="455" class="m">below 0.35</text>
+
+  <rect x="429" y="388" width="152" height="92" rx="10" class="c2"/>
+  <text x="441" y="412" class="mono k2">UNGROUNDED_DRAFT</text>
+  <text x="441" y="437" class="s">draft fails checks</text>
+  <text x="441" y="455" class="m">after one retry</text>
+
+  <rect x="588" y="388" width="152" height="92" rx="10" class="c2"/>
+  <text x="600" y="412" class="mono k2" font-size="10">UNSUPPORTED_LANGUAGE</text>
+  <text x="600" y="437" class="s">not English</text>
+  <text x="600" y="455" class="m">or German</text>
+
+  <rect x="747" y="388" width="153" height="92" rx="10" class="c2"/>
+  <text x="759" y="412" class="mono k2">ENGINE_DEGRADED</text>
+  <text x="759" y="437" class="s">LLM unavailable;</text>
+  <text x="759" y="455" class="m">extractive draft used</text>
+
+  <!-- else -->
+  <line x1="150" y1="498" x2="150" y2="526" stroke="#94a3b8" stroke-width="2" marker-end="url(#a)"/>
+  <text x="162" y="517" class="lbl">no reasons at all</text>
+
+  <!-- AUTO_DRAFT -->
+  <rect x="40" y="530" width="880" height="84" rx="14" fill="#34d399" fill-opacity="0.07" stroke="#34d399" stroke-opacity="0.55"/>
+  <text x="62" y="568" font-size="24" font-weight="800" fill="#34d399">OK</text>
+  <text x="62" y="588" font-size="10" font-weight="700" letter-spacing="1.5" fill="#6ee7b7">NO REASONS</text>
+  <rect x="152" y="556" width="150" height="30" rx="8" fill="#34d399" fill-opacity="0.16" stroke="#34d399" stroke-opacity="0.7"/>
+  <text x="227" y="576" text-anchor="middle" class="mono" font-size="12.5" font-weight="800" fill="#a7f3d0">AUTO_DRAFT</text>
+  <text x="330" y="566" font-size="13" fill="#e2e8f0">Grounded draft with validated citations, ready to send</text>
+  <text x="330" y="586" class="m">confident classification, a close precedent, no risk keywords, no outage</text>
+
+  <!-- footer -->
+  <text x="40" y="646" class="lbl">Every matching reason is returned with its detail. The draft is always written, and held unless the decision is AUTO_DRAFT.</text>
+</svg>
