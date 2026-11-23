@@ -1,4 +1,4 @@
-# SentinelDesk Hallucination & Draft Grounding Rubric (QA-06)
+# TriageAI Hallucination & Draft Grounding Rubric (QA-06)
 
 **Purpose:** Provide an objective, reproducible 4-tier rubric to audit and score LLM-generated ticket response drafts for factual grounding, citation integrity, and safety compliance.  
 **Target:** 15 sample drafts scored during integration (`QA-08`).  
@@ -48,7 +48,7 @@ Total Score = (Factuality × 0.35) + (Citation Fidelity × 0.35) + (Tone & Actio
 
 ### Dimension 4: Critical Hallucination Penalty (-5.0)
 An immediate **-5.0 deduction** is applied if the model:
-1. Fabricates internal URLs (e.g., `https://sentineldesk.corp/admin/reset`).
+1. Fabricates internal URLs (e.g., `https://triageai.corp/admin/reset`).
 2. Invents fake CLI flags or bash commands not grounded in precedent snippets.
 3. Promises financial compensation, refunds, or SLA penalty payouts without human sign-off.
 4. Hallucinates credentials, mock passwords, or imaginary telephone extensions.

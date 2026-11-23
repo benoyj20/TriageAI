@@ -31,7 +31,7 @@ SAMPLE_DRAFTS = [
         "id": "AUDIT-02",
         "scenario": "VPN Gateway Timeout (P1)",
         "precedents": ["TKT-01049: US-East gateway IP saturation; route traffic to regional endpoint us-east-b.gateway.net."],
-        "draft": "Team,\n\nWe are tracking IP pool saturation on the primary gateway. Per runbook [TKT-01049], failover has been enabled. Please connect via `us-east-b.gateway.net`.\n\n— SentinelDesk NOC",
+        "draft": "Team,\n\nWe are tracking IP pool saturation on the primary gateway. Per runbook [TKT-01049], failover has been enabled. Please connect via `us-east-b.gateway.net`.\n\n— TriageAI NOC",
         "expected_pass": True
     },
     {
@@ -161,7 +161,7 @@ def score_draft(sample):
 
 def main():
     print(f"\n{'='*82}")
-    print(f"🔬 SentinelDesk Hallucination Audit Runner (QA-08)")
+    print(f"🔬 TriageAI Hallucination Audit Runner (QA-08)")
     print(f"   Scoring 15 Sample Drafts against QA-06 Rubric")
     print(f"{'='*82}\n")
 

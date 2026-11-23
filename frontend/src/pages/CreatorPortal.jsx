@@ -233,7 +233,7 @@ export default function CreatorPortal({ ticketId }) {
               <ShieldCheck size={19} strokeWidth={2.4} aria-hidden />
             </span>
             <span className="text-[16px] font-bold tracking-tight">
-              SentinelDesk <span className="font-medium text-slate-400">Support</span>
+              TriageAI <span className="font-medium text-slate-400">Support</span>
             </span>
           </a>
           <a
@@ -492,7 +492,7 @@ export default function CreatorPortal({ ticketId }) {
         )}
       </main>
 
-      <footer className="pb-8 text-center text-[12px] text-ink-3">SentinelDesk · AI incident triage for IT support teams</footer>
+      <footer className="pb-8 text-center text-[12px] text-ink-3">TriageAI · AI incident triage for IT support teams</footer>
     </div>
   );
 }

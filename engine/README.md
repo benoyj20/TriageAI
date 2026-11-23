@@ -49,13 +49,15 @@ Every stage is `fn(state: TicketState) -> None`. It reads what earlier stages wr
 
 | Stage | Writes | Owner | Status |
 |---|---|---|---|
-| `language` | `state.language` | ML engineer | stub |
-| `global_search` | `state.query_embedding`, `state.global_neighbours` (unfiltered top 10) | ML engineer | stub |
-| `classify` | `state.classification` | ML engineer | stub |
-| `route_and_search` | `state.retrieval`, `state.precedents`, `state.evidence` (full answers for the prompt) | ML engineer | stub |
-| `draft` | `state.draft` (without `validation`), `state.llm_failed` | Benoy | stub |
-| `validate` | `state.draft["validation"]`, `state.draft["citations"]` | Benoy | stub |
+| `language` | `state.language` | ML engineer | real when live* |
+| `global_search` | `state.query_embedding`, `state.global_neighbours` (unfiltered top 10) | ML engineer | real when live* |
+| `classify` | `state.classification` | ML engineer | real when live* |
+| `route_and_search` | `state.retrieval`, `state.precedents`, `state.evidence` (full answers for the prompt) | ML engineer | real when live* |
+| `draft` | `state.draft` (without `validation`), `state.llm_failed` | Benoy | **real** |
+| `validate` | `state.draft["validation"]`, `state.draft["citations"]` | Benoy | **real** |
 | `gate` | `state.gate`, `state.burst` | Data analyst | **real** |
+
+\* At startup, when `REDIS_URL` and an embedding provider are configured, `pipeline.use_live_stages()` swaps the four ML stubs for the live stages in `app/stages_live.py`; without them the stubs stay in place.
 
 `GET /healthz` lists which stages are still stubs. Stubs are deliberately honest: low confidence and no precedents, so every ticket goes to human review with a holding reply until the real stages are in.
 

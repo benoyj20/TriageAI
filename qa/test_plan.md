@@ -1,7 +1,7 @@
-# SentinelDesk Master Test Plan & Bug Tracker (QA-01 & QA-03)
+# TriageAI Master Test Plan & Bug Tracker (QA-01 & QA-03)
 
 **Author:** QA Lead  
-**Scope:** Full-stack SentinelDesk Pipeline (Console ↔ Go Gateway ↔ Python Engine ↔ Redis Vector Store)  
+**Scope:** Full-stack TriageAI Pipeline (Console ↔ Go Gateway ↔ Python Engine ↔ Redis Vector Store)  
 **Contract Version:** API v1 (Frozen)  
 **Status:** Living Document  
 
@@ -9,7 +9,7 @@
 
 ## 🎯 1. Quality Objectives & Quality Gates
 
-The SentinelDesk platform must meet the following strict non-negotiable quality gates before hackathon submission:
+The TriageAI platform must meet the following strict non-negotiable quality gates before hackathon submission:
 
 | Quality Gate | Metric / Invariant | Threshold | Validation Method |
 | :--- | :--- | :--- | :--- |
@@ -18,7 +18,7 @@ The SentinelDesk platform must meet the following strict non-negotiable quality 
 | **Zero Data Leakage** | Holdout test set contamination in KB | **0% overlap** | `qa/audit_leakage.py` |
 | **End-to-End Latency** | Pipeline P95 response time | **< 400 ms** | `ml/latency.py` & gateway telemetry |
 | **Hallucination Bound** | Unverified claims in Auto-Drafts | **0 ungrounded** | Hallucination rubric (`QA-06`) |
-| **Null-Safety** | Missing / empty / whitespace subjects | **Zero 500 crashes** | Golden set tickets `GOLD-15`..`GOLD-20` |
+| **Null-Safety** | Missing / empty / whitespace subjects | **Zero 500 crashes** | Golden set tickets `GOLD-15`..`GOLD-19` |
 
 ---
 
@@ -34,7 +34,7 @@ All issues identified during testing are tracked with standardized GitHub labels
 
 ### Domain Labels
 - `area:gateway`: Go gateway proxy, PII masking, token bucket rate limiter, or HTTP routing.
-- `area:engine`: Python FastAPI, classification pipeline, Gemini embeddings, or prompt synthesis.
+- `area:engine`: Python FastAPI, classification pipeline, embeddings (OpenAI, or Gemini without an OpenAI key), or prompt synthesis.
 - `area:retrieval`: Redis hierarchical KNN search, vector indexing, or centroid distance.
 - `area:frontend`: React console, triage dashboard, telemetry capsule, or keyboard hotkeys.
 - `area:contract`: Schema drift or field mismatches against `contracts/schema/`.
@@ -47,11 +47,11 @@ All issues identified during testing are tracked with standardized GitHub labels
 - **Owner:** Full-stack Dev + QA Lead
 - **Target:** Go gateway (`backend/internal/pii/`)
 - **Key Assertions:**
-  1. Credit card numbers (Luhn-compliant & raw sequences) masked to `[CARD_1]`.
-  2. Social Security Numbers and IBAN numbers masked to `[ACCOUNT_1]` / `[IBAN_1]`.
-  3. IP addresses (IPv4 & IPv6) and email addresses masked to `[IP_1]` and `[EMAIL_1]`.
+  1. Credit card numbers (Luhn-valid, or grouped like a card) masked to `[CARD_1]`.
+  2. IBANs masked to `[IBAN_1]`; account, customer and contract numbers that follow a label (e.g. "account number", "Kundennummer") masked to `[ACCOUNT_1]`.
+  3. IP addresses (IPv4 & IPv6), email addresses and phone numbers masked to `[IP_1]`, `[EMAIL_1]` and `[PHONE_1]`.
   4. Numbering is consistently shared across `subject` and `body`.
-  5. The Python engine never receives unmasked credentials or personal tokens.
+  5. The Python engine never receives the unmasked values of these six types (EMAIL, PHONE, IP, IBAN, CARD, ACCOUNT). Passwords and API tokens are not masked.
 
 ### Suite B: Escalation Gate Policy & Adversarial Robustness
 - **Owner:** Data Analyst + QA Lead
@@ -68,13 +68,13 @@ All issues identified during testing are tracked with standardized GitHub labels
 - **Key Assertions:**
   1. Level 1 routes to top 2 candidate queues based on ensemble score (classifier probability + centroid cosine).
   2. Level 2 filters Redis KNN search to routed queues (`@queue:{...}`).
-  3. When top-1 similarity < 0.28, global fallback triggers; if still below floor, `NO_PRECEDENT` fires with holding mode draft.
+  3. When the routed search finds nothing, or its top-1 is more than 0.05 below the global top-1 (`fallback_margin`), the global result is used; if the final top-1 similarity is below 0.35, `NO_PRECEDENT` fires.
 
 ### Suite D: End-to-End Golden Set Runner (`QA-07`)
 - **Target:** 30 curated unseen tickets (`qa/golden_test_set.json`)
 - **Execution Command:**
   ```bash
-  python3 qa/run_golden_set.py --target http://localhost:8080/api/v1/triage
+  python3 qa/run_golden_set.py --endpoint http://localhost:8080/api/v1/triage
   ```
 - **Passing Threshold:** 30/30 (100%) correct gate decisions (`ESCALATE_ONCALL` vs `HUMAN_REVIEW` vs `AUTO_DRAFT`).
 
@@ -85,9 +85,9 @@ All issues identified during testing are tracked with standardized GitHub labels
 | Test Suite | Total Cases | Target Pass Rate | Automated? | Runner / Location |
 | :--- | :---: | :---: | :---: | :--- |
 | Frontend React Unit Tests | 15 | 100% | Yes | `cd frontend && npm test` |
-| Gateway PII & Server Tests | 18 | 100% | Yes | `cd backend && go test ./...` |
-| Python Engine Contract Tests | 12 | 100% | Yes | `pytest engine/tests/` |
-| ML Retrieval Quality Suite | 8 | 100% | Yes | `pytest ml/tests/` |
-| Golden Set End-to-End Suite | 30 | 100% | Yes | `python3 qa/run_golden_set.py` |
+| Gateway PII & Server Tests | 29 | 100% | Yes | `cd backend && go test ./...` |
+| Python Engine Tests | 135 | 100% | Yes | `pytest engine/` (126 in `engine/tests/`, 9 in `engine/app/policy/test_gate.py`) |
+| ML Pipeline & Search Suite | 11 | 100% (1 skipped without Redis) | Yes | `pytest ml/tests/` |
+| Golden Set End-to-End Suite | 30 | 100% | Yes | `python3 qa/run_golden_set.py --endpoint <url>` |
 | Hallucination Rubric Audit | 15 | Score ≥ 4.5/5 | Manual | `qa/hallucination_rubric.md` |
-| Data Leakage Audit Sign-off | 1 | 0% Contamination | Automated | `python3 qa/audit_leakage.py` |
+| Data Leakage Audit Sign-off | 7 | 0% Contamination | Automated | `python3 qa/audit_leakage.py` |

@@ -107,7 +107,7 @@ def test_remote_endpoint(url, ticket):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Evaluate SentinelDesk Golden Test Set")
+    parser = argparse.ArgumentParser(description="Evaluate TriageAI Golden Test Set")
     parser.add_argument("--endpoint", default=None, help="HTTP URL to POST tickets to (e.g. http://localhost:8080/api/v1/triage)")
     args = parser.parse_args()
 
@@ -119,7 +119,7 @@ def main():
         cases = json.load(f)
 
     print(f"\n{'='*82}")
-    print(f"🧪 SentinelDesk Golden Test Set Runner (QA-02 / QA-07)")
+    print(f"🧪 TriageAI Golden Test Set Runner (QA-02 / QA-07)")
     print(f"   Loaded: {len(cases)} test tickets from {GOLDEN_PATH.name}")
     print(f"   Mode:   {'Remote API (' + args.endpoint + ')' if args.endpoint else 'Local Policy Invariant Audit'}")
     print(f"{'='*82}\n")

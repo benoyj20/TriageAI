@@ -1,4 +1,4 @@
-"""SentinelDesk API contract v1 as Pydantic models.
+"""TriageAI API contract v1 as Pydantic models.
 
 This module is the executable form of ``contracts/``:
 

@@ -1,4 +1,4 @@
-# SentinelDesk: 5-hour build plan (historical)
+# TriageAI: 5-hour build plan (historical)
 
 The plan the team built from. For what was built, how to run it and the results, see the [root README](../README.md).
 

@@ -113,7 +113,7 @@ export function InsightsTab() {
         <div>
           <h1 className="flex items-center gap-2 text-[18px] font-semibold text-ink">
             <BarChart3 size={20} className="text-brand-600" aria-hidden />
-            SentinelDesk dataset insights
+            TriageAI dataset insights
           </h1>
           <p className="text-[12.5px] text-ink-3">Historical ticket distribution and holdout benchmark telemetry.</p>
         </div>

@@ -13,7 +13,7 @@ These need a human with the accounts. Do them once, before kickoff:
 4. **Check access.** Each Python dev runs this from the repo root:
 
    ```
-   pip install boto3 redis google-genai
+   pip install boto3 redis openai google-genai
    python infra/check_access.py
    ```
 
@@ -33,16 +33,18 @@ python infra/check_access.py                                           # Redis l
 - RedisInsight: http://localhost:8001. Add a database at `localhost:6379` with the same password.
 - Data survives restarts in the `redis-data` volume. To start over: `docker compose --env-file .env -f infra/docker-compose.dev.yml down -v`.
 
-The image is pinned (`redis/redis-stack:7.4.0-v8`) so every laptop and EC2 run the same Redis. On EC2, port 6379 is never opened in the security group.
+The image is pinned (`redis/redis-stack:7.4.0-v8`; EC2 uses `redis/redis-stack-server:7.4.0-v8`, the same Redis without RedisInsight) so every laptop and EC2 run the same Redis. On EC2, port 6379 is never opened in the security group.
 
 ## Deploying to EC2 (H-08, H-15, H-19)
 
+This was the hackathon deployment. The project now runs locally (see the root [`README.md`](../README.md#run-it-locally)); these steps and the deploy files are kept for reference. The full write-up is [`docs/DEPLOYMENT.md`](../docs/DEPLOYMENT.md).
+
 One-time box setup (Ubuntu 22.04+, t3.large, 30 GB disk):
 
-1. Security group: allow **80** (and 443 if you add TLS) from anywhere, **22** from your IP only. Never open 6379, 8000 or 8001.
+1. Security group: allow **80** and **443** (Caddy, automatic HTTPS) from anywhere, **22** from your IP only. Never open 6379, 8000 or 8001.
 2. Install Docker: `curl -fsSL https://get.docker.com | sudo sh && sudo usermod -aG docker $USER`, then log out and back in.
-3. `git clone https://github.com/Dogtags27/gdg-sentinal.git && cd gdg-sentinal`, then create `.env` from `infra/env.template` with the real keys. Set `REDIS_PASSWORD` to a long random value and `MOCK_ENGINE=false`.
-4. Restore the Redis index (after the ML engineer uploads `redis/dump_v1.rdb` to R2): run `docker compose --env-file .env -f infra/docker-compose.prod.yml up -d redis`, stop it, copy the file into the `redis-data` volume as `dump.rdb`, start it again.
+3. `git clone https://github.com/Dogtags27/gdg-sentinal.git && cd gdg-sentinal`, then create `.env` from `infra/env.template` with the real keys. Set `API_DOMAIN` (the hostname Caddy serves), `REDIS_PASSWORD` to a long random value (or leave it out and `deploy.sh` generates one) and `MOCK_ENGINE=false`.
+4. Redis index: after the ML engineer uploads `redis/dump_v1.rdb` to R2, the first `deploy.sh` run copies it into the `redis-data` volume as `dump.rdb`. `RESTORE_REDIS=1 ./infra/deploy.sh` reloads it after a re-index.
 
 Every deploy after that:
 
@@ -50,6 +52,6 @@ Every deploy after that:
 ./infra/deploy.sh
 ```
 
-It pulls main, rebuilds, restarts, waits for `/readyz`, and sends two warm-up tickets (`infra/warmup.py`). Check the stack at any time with `docker compose --env-file .env -f infra/docker-compose.prod.yml ps` and `curl localhost/api/v1/health`. Keep the local dev stack (`docker-compose.dev.yml`) running on one laptop as a hot spare for the demo.
+It pulls main, rebuilds, restores the Redis index on the first run, restarts, waits for `/api/v1/health` at `https://$API_DOMAIN`, and sends two warm-up tickets (`infra/warmup.py`). Check the stack at any time with `docker compose --env-file .env -f infra/docker-compose.prod.yml ps` and `curl https://<API_DOMAIN>/api/v1/health`. Keep the local dev stack (`docker-compose.dev.yml`) running on one laptop as a hot spare for the demo.
 
-Images: `Dockerfile.engine` (Python), `Dockerfile.gateway` (builds the React console and the Go binary, serves both on 8080, published on port 80). The gateway image needs `backend/go.mod` and `backend/cmd/api/main.go` from the full-stack dev, and honours `WEB_DIR` for the console files.
+Images: `Dockerfile.engine` (Python, port 8000), `Dockerfile.gateway` (the Go binary only, port 8080, with `analytics/insights` bundled for the Insights JSON; `WEB_DIR` is empty because the console runs on Vercel). Neither is published: Caddy (`Caddyfile`) is the only public service, on 80 and 443, and proxies to the gateway.

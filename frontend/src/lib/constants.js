@@ -22,11 +22,12 @@ export const REASONS = {
   ENGINE_DEGRADED: { severity: 'P2', label: 'Engine degraded', hint: 'LLM failed; extractive fallback used' },
 };
 
-// Mirrors the EscalationGate defaults in engine/app/policy/gate.py (DA-06). Change them there first.
+// Mirrors the thresholds the live engine applies (engine/app/stages_live.py apply_thresholds and
+// engine/app/policy/gate.py, DA-06). Change them there first.
 export const GATE_THRESHOLDS = {
-  highPriority: 0.38, // HIGH_PRIORITY_INCIDENT when Type=Incident and P(high) >= this
+  highPriority: 0.26, // HIGH_PRIORITY_INCIDENT when Type=Incident and P(high) >= this (tuned priority_high_threshold)
   confidenceFloor: 0.42, // LOW_CONFIDENCE below this
-  precedentSimilarity: 0.28, // NO_PRECEDENT when top-1 similarity is below this
+  precedentSimilarity: 0.35, // NO_PRECEDENT when top-1 similarity is below this (no_precedent_threshold)
 };
 
 export const PRIORITIES = {

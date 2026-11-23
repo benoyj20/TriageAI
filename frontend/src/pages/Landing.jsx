@@ -66,7 +66,7 @@ export default function Landing({ onChoose }) {
             <span className="grid h-8 w-8 place-items-center rounded-lg bg-teal-500 text-brand-950">
               <ShieldCheck size={19} strokeWidth={2.4} aria-hidden />
             </span>
-            <span className="text-[16px] font-bold tracking-tight">SentinelDesk</span>
+            <span className="text-[16px] font-bold tracking-tight">TriageAI</span>
           </a>
         </header>
 
@@ -85,7 +85,7 @@ export default function Landing({ onChoose }) {
               Classified, answered from real resolutions, and routed to the right people.
             </p>
 
-            <div role="group" aria-label="Choose how you use SentinelDesk" className="mt-8 grid gap-3 sm:max-w-[520px]">
+            <div role="group" aria-label="Choose how you use TriageAI" className="mt-8 grid gap-3 sm:max-w-[520px]">
               {ROLES.map((r, i) => (
                 <RoleCard key={r.id} role={r} onChoose={onChoose} delay={`${180 + i * 80}ms`} />
               ))}
@@ -118,7 +118,7 @@ export default function Landing({ onChoose }) {
         </main>
 
         <footer className="shrink-0 py-5 text-center text-[12px] text-slate-500">
-          SentinelDesk · AI incident triage for IT support teams
+          TriageAI · AI incident triage for IT support teams
         </footer>
       </div>
     </div>

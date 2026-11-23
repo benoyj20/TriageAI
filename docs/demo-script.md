@@ -1,4 +1,4 @@
-# SentinelDesk judge demo
+# TriageAI judge demo
 
 **Length:** about 7 minutes, then Q&A
 **App:** https://gdg-sentinal.vercel.app (API: https://api.maplestreettax.site) · **Video:** https://youtu.be/UBkSEnIPQRM
@@ -28,13 +28,13 @@ Every ticket below was run against the live stack before the demo, and the outco
 | B2 | Customer | *(empty)* | VPN nicht erreichbar, seit kurzem kann sich niemand im Team verbinden. | 2nd of 3: escalated |
 | B3 | Customer | *(empty)* | The VPN is down for our whole team, the connection times out every time. | 3rd of 3: `ACTIVE_OUTAGE`, red major-incident banner for the manager |
 
-Send B1–B3 within 5 minutes and in this order; each must be different text (re-sending the same text never counts twice). Samples 5–8 are also in Live triage's built-in list, so nothing needs typing under pressure.
+Send B1–B3 within 5 minutes and in this order; each must be different text (re-sending the same text never counts twice). Samples 7 and 8 are also in Live triage's built-in list, and its **EN · Refund + prompt injection** sample is a close variant of 5, so only 6 needs typing.
 
 ## Flow
 
 ### 0:00 The problem and the two roles
 **Screen:** landing page.
-> "Helpdesks get outages, password questions and refund demands in one inbox, and chatbots make up policies. SentinelDesk triages every ticket, decides whether a reply is safe, and drafts only from how past tickets were actually solved. There are two people here: the customer who files a ticket, and the incident manager who resolves it. They see different things."
+> "Helpdesks get outages, password questions and refund demands in one inbox, and chatbots make up policies. TriageAI triages every ticket, decides whether a reply is safe, and drafts only from how past tickets were actually solved. There are two people here: the customer who files a ticket, and the incident manager who resolves it. They see different things."
 
 ### 0:40 Customer: a ticket, and help while they wait (samples 1 and 2)
 **Screen:** left window, submit **1**.
@@ -75,7 +75,7 @@ Send **B1**, **B2**, **B3** from the customer window.
 > "On 8,034 held-out tickets the model never saw: type macro-F1 0.894, priority 0.704, queue 0.639; the gate escalates 87 of every 100 true high-priority incidents."
 
 ### 6:30 Close
-> "SentinelDesk escalates what's dangerous, drafts only what history supports, shows its evidence, and helps the customer while they wait, in their own language. Try it with your own ticket."
+> "TriageAI escalates what's dangerous, drafts only what history supports, shows its evidence, and helps the customer while they wait, in their own language. Try it with your own ticket."
 
 ## Questions judges ask
 

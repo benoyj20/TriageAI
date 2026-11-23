@@ -149,7 +149,7 @@ def check_csv_alignment(ops: dict[str, Any]) -> list[str]:
 
 
 def main() -> int:
-    print("SentinelDesk DA-02 — verify operations_insights.json\n")
+    print("TriageAI DA-02 — verify operations_insights.json\n")
 
     errors = check_mirrors()
     if errors:

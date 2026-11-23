@@ -37,7 +37,7 @@ export default function TopBar({ route, query, setQuery }) {
         <span className="grid h-8 w-8 place-items-center rounded-lg bg-teal-500 text-brand-950">
           <ShieldCheck size={19} strokeWidth={2.4} aria-hidden />
         </span>
-        <span className="hidden text-[16px] font-bold tracking-tight sm:inline">SentinelDesk</span>
+        <span className="hidden text-[16px] font-bold tracking-tight sm:inline">TriageAI</span>
       </a>
 
       <form onSubmit={onSubmit} role="search" className="relative min-w-0 flex-1 sm:max-w-[440px]">

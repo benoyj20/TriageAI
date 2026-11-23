@@ -1,4 +1,4 @@
-"""SentinelDesk triage engine (FastAPI). Private: only the Go gateway calls it.
+"""TriageAI triage engine (FastAPI). Private: only the Go gateway calls it.
 
 Run from the repo root (single worker, because the burst detector keeps state in memory):
 
@@ -51,7 +51,7 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(
-    title="SentinelDesk engine",
+    title="TriageAI engine",
     version=CONTRACT_VERSION,
     description="Private triage engine. Contract: contracts/README.md",
     lifespan=lifespan,

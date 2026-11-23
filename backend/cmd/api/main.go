@@ -1,4 +1,4 @@
-// Command gateway is the SentinelDesk Go gateway (FS-02): it validates tickets, masks PII, calls the
+// Command gateway is the TriageAI Go gateway (FS-02): it validates tickets, masks PII, calls the
 // engine (or the built-in mock) and serves the built console.
 package main
 

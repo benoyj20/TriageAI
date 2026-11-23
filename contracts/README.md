@@ -21,6 +21,8 @@ Values in the examples (ticket IDs, scores, timings, answer text) are made up. F
 
 The engine is private (port 8000, never exposed). Only the gateway calls it.
 
+The gateway also serves `GET /api/v1/insights/{name}` and proxies the ticket store routes (`/api/v1/tickets...`) to the engine's `/v1/tickets...`. Those are outside contract v1; see [`backend/README.md`](../backend/README.md).
+
 TriageResponse examples, one per state the console must render:
 
 | Example | Decision | What it shows |
@@ -137,12 +139,12 @@ The engine's `GET /healthz` adds `stages`, which says whether each pipeline stag
 
 ## Migrating the console from the provisional shape
 
-Everything the console reads today keeps its name and meaning. Changes:
+Done: the console in `frontend/` already uses contract v1. Kept for reference. Everything the console read before kept its name and meaning. Changes:
 
 - **Paths:** `/api/triage` → `/api/v1/triage`, and `/api/health` → `/api/v1/health` (in `frontend/src/api/client.js`).
 - **Health:** the `qdrant` key is gone. Read `components.vector_db` (Redis now); `status` works as before.
-- **`draft.mode` has a third value, `holding`.** `normalize.js` maps it to "Generated" today; it needs its own label, such as "Holding reply".
-- **`precedents` can be empty** (every NO_PRECEDENT ticket). `DetailsModal.jsx` reads `t.precedents[0]` without a check and will throw.
+- **`draft.mode` has a third value, `holding`.** `normalize.js` accepts it, and the console labels it "Holding reply".
+- **`precedents` can be empty** (every NO_PRECEDENT ticket). `DetailsModal.jsx` checks for that before reading `t.precedents[0]`.
 - **`burst`** is `null` or an object with `cluster_id`, plus `queue`, `lead_term`, `ticket_count`, `first_seen` and `last_seen`.
 - **New fields to show:**
   - `precedents[].answer_snippet` (the brief asks for the historical answer snippet)
@@ -152,4 +154,4 @@ Everything the console reads today keeps its name and meaning. Changes:
   - `request_id` (put it in error toasts for debugging)
   - `warnings`
 - **Errors** always use `{error: {code, message, request_id}}`.
-- **The request needs `body`.** A subject-only ticket gets 422, while the in-browser mock accepts either.
+- **The request needs `body`.** A subject-only ticket gets 422, and the in-browser mock rejects it too.

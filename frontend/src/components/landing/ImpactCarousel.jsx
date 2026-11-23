@@ -5,7 +5,7 @@ const INTERVAL_MS = 4500;
 
 // Only real, measured facts. Keep each slide to a headline and one short line.
 const SLIDES = [
-  { icon: Zap, kicker: 'SentinelDesk', title: 'Every ticket triaged in seconds', body: 'Type, queue, priority and language, the moment it arrives.' },
+  { icon: Zap, kicker: 'TriageAI', title: 'Every ticket triaged in seconds', body: 'Type, queue, priority and language, the moment it arrives.' },
   { icon: BookCheck, kicker: 'Grounded replies', stat: '42,675', title: 'resolved tickets behind every draft', body: 'Drafts cite real past resolutions. No invented refunds, prices or promises.' },
   { icon: Siren, kicker: 'Never miss an outage', stat: '87%', title: 'of high-priority incidents caught', body: 'On unseen tickets. Bursts of the same failure raise a major-incident alert.' },
   { icon: Languages, kicker: 'English and German', title: "Replies in the customer's language", body: 'Personal data is masked before any AI sees it.' },
@@ -57,7 +57,7 @@ export default function ImpactCarousel({ className = '' }) {
       className={`impact-carousel relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur-md sm:p-6 ${className}`}
       role="region"
       aria-roledescription="carousel"
-      aria-label="What SentinelDesk does"
+      aria-label="What TriageAI does"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onFocus={() => setFocused(true)}

@@ -119,7 +119,8 @@ shows the real time of every stage on every ticket.
 
 **Safe by construction.** The Go gateway masks emails, phones, IPs, IBANs, cards and account numbers *before* the
 engine or any LLM sees the text. A draft is rejected if it cites a ticket that was not retrieved, contains a number
-that is not in the evidence, or is in the wrong language. It gets one retry, then falls back to an extractive answer.
+that is not in the evidence, or is in the wrong language. It gets one retry; if it still fails, the gate holds it for
+human review (`UNGROUNDED_DRAFT`). If the LLMs themselves fail, the engine falls back to an extractive answer.
 
 **It knows when not to answer.** The gate escalates or holds a ticket for human review on a high-priority incident,
 low confidence, no precedent, an unsupported request, a security, outage or legal signal, a prompt-injection attempt,
@@ -190,7 +191,7 @@ contract in [`contracts/`](contracts/README.md).
 | **7 / 7** | leakage-audit checks passing on the real split |
 | **30** | golden tickets with expected gate decisions, run through the live pipeline |
 | **15** | frontend tests, plus Python (engine and ML) and Go gateway suites |
-| **3** | independent LLM providers in the fallback chain, ending in a model-free answer |
+| **3** | steps in the draft fallback chain: OpenAI, then Gemini, then a model-free extractive answer |
 
 The pre-freeze checklist is in [`qa/final_regression.md`](qa/final_regression.md).
 
@@ -199,7 +200,7 @@ The pre-freeze checklist is in [`qa/final_regression.md`](qa/final_regression.md
 Everything runs on your own machine: the console, the gateway, the engine, Redis, and the full AI pipeline
 (embeddings, retrieval, grounded drafts). The only outside calls are to the LLM provider you configure.
 
-Needs **Node 20+**, **Go 1.22+**, **Python 3.11+**, **Docker** and **git**, plus an **OpenAI** or **Gemini** API key
+Needs **Node 20.19+**, **Go 1.22+**, **Python 3.11+**, **Docker** and **git**, plus an **OpenAI** or **Gemini** API key
 for the AI part.
 
 ```

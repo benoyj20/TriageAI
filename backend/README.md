@@ -1,4 +1,4 @@
-# SentinelDesk gateway (backend)
+# TriageAI gateway (backend)
 
 Go 1.22+, standard library only. Owner: Full-stack dev. The console talks only to this gateway; the Python
 engine (:8000) and Redis stay private. Every message follows the frozen API contract in
@@ -31,8 +31,9 @@ serves `../frontend/dist`. For the Vite dev server instead, put `VITE_USE_MOCK=f
 | Route | Notes |
 |---|---|
 | `POST /api/v1/triage` | Contract request rules; assigns `request_id`, `ticket_id` (when missing) and `created_at`; masks PII; adds `pii` and `latency_ms.gateway` to the engine's answer |
-| `GET /api/v1/health` | Always 200. `status` is `down` when the engine is unreachable and `degraded` while it reports stub stages. In mock mode it is `ok` with `mode: "mock"` |
+| `GET /api/v1/health` | Always 200. `status` is `down` when the engine is unreachable and `degraded` while it reports stub stages. In mock mode it is `degraded` with `mode: "mock"` (engine and `vector_db` report `stub`) |
 | `GET /api/v1/insights/{operations\|model}` | `operations_insights.json` / `model_insights.json` from `INSIGHTS_DIR` (not part of the contract) |
+| `GET /api/v1/tickets`, `GET /api/v1/tickets/{id}`, `GET /api/v1/tickets/{id}/status`, `GET /api/v1/tickets/{id}/related`, `PUT /api/v1/tickets/{id}/status` | Ticket store, proxied to the engine's `/v1/tickets...` routes after an ID check (`internal/api/tickets.go`; not part of the contract). In mock mode they answer 503 `ENGINE_UNAVAILABLE` |
 | everything else | the built console; unknown paths get `index.html`, unknown `/api/` paths a 404 envelope |
 
 Errors use the contract envelope `{"error":{"code","message","request_id"}}` and codes: `INVALID_JSON` 400,

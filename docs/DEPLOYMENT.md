@@ -1,5 +1,7 @@
 # Deployment
 
+This describes the hackathon deployment. The project now runs locally (see [Run it locally](../README.md#run-it-locally) in the root README); the deploy files are kept in [`infra/`](../infra/) for reference.
+
 ```
 Browser ──► Vercel (React console, <domain>)
               │  /api/*  rewrite (same origin, no CORS)
@@ -29,7 +31,7 @@ Only Caddy is public (80/443). The gateway, engine and Redis talk on the interna
    - `api.<domain>`: A record pointing to the EC2 Elastic IP.
    - `<domain>` (or `app.<domain>`): the records Vercel shows when you add the domain to the project.
 3. **Bootstrap the box:** `ssh ubuntu@<ip> 'bash -s' < infra/ec2_bootstrap.sh`. It installs Docker, fail2ban and swap, and clones the repo to `/opt/sentineldesk`.
-4. **Secrets:** copy your `.env` to `/opt/sentineldesk/.env` and add `API_DOMAIN=api.<domain>`. `deploy.sh` generates `REDIS_PASSWORD` on the box.
+4. **Secrets:** copy your `.env` to `/opt/sentineldesk/.env` and add `API_DOMAIN=api.<domain>`. `deploy.sh` generates `REDIS_PASSWORD` on the box when `.env` doesn't set one, so delete the laptop value (`change-me-locally` from the template) first.
 5. **Vercel:** set `"destination"` in `frontend/vercel.json` to `https://api.<domain>/api/:path*`. Then either `npx vercel --prod` from `frontend/`, or import the repo in the Vercel dashboard with root directory `frontend`. No environment variables are needed.
 
 ## Every deploy

@@ -9,7 +9,7 @@ When high-volume customer and IT support tickets arrive:
 2. **Classifies & Routes**: Predicts priority, queue, and category using hybrid ML.
 3. **Retrieves Precedents**: Uses **Hierarchical RAG** over Redis RediSearch HNSW to find verified historical solutions.
 4. **Enforces Deterministic Gates**: Applies hardcoded policy rules (security vulnerabilities, prompt injection, GDPR, mass outage bursts) that LLMs cannot bypass.
-5. **Generates Grounded Drafts**: Drafts replies with an LLM (OpenAI `gpt-5.4-mini`, Gemini as fallback) with strict ticket ID citations (`[TKT-xxxxx]`), routing P1 emergencies to on-call teams and low-risk tickets to automated dispatch.
+5. **Generates Grounded Drafts**: Drafts replies with an LLM (OpenAI `gpt-5.4-mini`, Gemini as fallback) with strict ticket ID citations (`[TKT-xxxxx]`), routing P1 emergencies to on-call teams and low-risk tickets to an auto-drafted reply that an agent accepts before it is sent.
 
 ---
 
@@ -30,12 +30,14 @@ the console through the gateway. Stage-by-stage detail and the data split and ga
 
 ### A. Frontend (Operator Console)
 * **Stack**: React 19, Vite (JavaScript), Tailwind CSS 4, Recharts, Lucide Icons.
-* **Role**: Real-time interface for support agents, team leads, and incident commanders.
+* **Role**: Real-time interface for two roles: ticket creators (`#/help`, `CreatorPortal.jsx`) and incident managers (`#/console`).
 * **Key Modules**:
-  * **Triage Dashboard (`TriageDashboard.jsx`)**: Filterable stream of incoming tickets with SLA countdowns, language badges (`EN` / `DE`), and priority flags.
-  * **Kanban Board (`KanbanBoard.jsx`)**: Operational status pipeline (`New` ➔ `Triage` ➔ `Investigating` ➔ `Escalated` ➔ `Resolved`).
+  * **Triage Dashboard (`TriageDashboard.jsx`)**: Overview of tickets in tabbed views (Needs action, Escalated, Human review, Auto-drafted, Resolved, Degraded) with a searchable, sortable table, language badges (`EN` / `DE`), priority, gate decision, confidence and bulk accept/reject.
+  * **Kanban Board (`KanbanBoard.jsx`)**: Operational status pipeline (`Incoming` ➔ `Escalated · On-call` ➔ `Human review` ➔ `Draft ready` ➔ `Resolved`).
   * **Ticket Detail & Draft Studio (`TicketDetail.jsx`)**: Split-pane view showing customer request, grounded AI draft, precedent citation links (`[TKT-xxxxx]`), and policy badges.
-  * **Executive Insights Tab (`InsightsTab.jsx`)**: Data Analyst telemetry dashboard displaying historical dataset distributions (28,587 tickets), queue bottlenecks, priority breakdowns, and model evaluation benchmarks.
+  * **Live Triage (`TriageLab.jsx`, `#/lab`)**: Test sandbox: paste any ticket or pick a sample and watch the full triage (tickets tagged `TEST-`).
+  * **Funnel (`FunnelPage.jsx`, `#/funnel`)**: Waterfall funnel of live tickets with pivots by language, queue, priority, type, decision and source.
+  * **Reports (`InsightsPage.jsx`, `#/insights`)**: Data Analyst telemetry: dataset distributions (28,587 tickets in the primary dataset file), queue breakdowns with critical outages, priority and type mix, and holdout evaluation benchmarks, plus a "This session" view.
 
 ### B. API Gateway (Edge Defense)
 * **Stack**: Go 1.22+ (Standard library `net/http` `ServeMux`).
@@ -50,8 +52,8 @@ the console through the gateway. Stage-by-stage detail and the data split and ga
 * **Stack**: Python 3.11+, FastAPI, Pydantic, Uvicorn.
 * **Role**: Central orchestrator coordinating language detection, classification, retrieval, policy evaluation, and generation.
 * **Key Responsibilities**:
-  * **Language Detection**: Dynamically routes English and German tickets to specialized prompt templates and regex checks.
-  * **Hybrid Classifier**: Combines linear models (TF-IDF + Logistic Regression) with semantic KNN neighbor votes to compute queue confidence.
+  * **Language Detection**: Detects English or German (anything else raises `UNSUPPORTED_LANGUAGE`) and sets the reply language and tone in the draft prompt; the keyword checks match both languages on every ticket.
+  * **Hybrid Classifier**: Combines linear models (TF-IDF + Logistic Regression) with semantic KNN neighbor votes to compute type, queue and priority probabilities.
   * **Citation Auditing**: Post-generation verification pass ensuring every `[TKT-xxxxx]` cited by the LLM was present in the retrieved context.
 
 ### D. Vector Database (Hierarchical RAG)
@@ -81,8 +83,8 @@ the console through the gateway. Stage-by-stage detail and the data split and ga
   * Rolling 5-minute window (`BURST_WINDOW_S`). When 3 or more distinct tickets (`BURST_MIN_TICKETS`) share an outage term, it fires `ACTIVE_OUTAGE`. Demo tickets (`SIM-`, `TEST-`, `WARMUP-`) use a separate window.
 
 ### F. Data & Analytics Foundation
-* **Dataset**: `Tobi-Bueck/customer-support-tickets` (**28,587 verified tickets**; 57.2% EN, 42.8% DE).
-* **Role**: Authoritative ground truth establishing priority distributions, queue SLAs, and holdout evaluation sets.
+* **Dataset**: `Tobi-Bueck/customer-support-tickets`. The insights export covers the primary file (`aa_dataset-tickets-multi-lang-5-2-50-version.csv`: **28,587 tickets**; 57.2% EN, 42.8% DE). The ML split de-duplicates it with the 20k file into 40,167 tickets (KB 32,133, holdout 8,034), plus 10,542 German topic rows without answers.
+* **Role**: Authoritative ground truth establishing type, queue and priority distributions, and holdout evaluation sets.
 * **Telemetry Mirrors**:
   * `analytics/insights/operations_insights.json` & `frontend/src/features/insights/data/operations_insights.json`
   * `analytics/insights/model_insights.json` & `frontend/src/features/insights/data/model_insights.json`
@@ -115,8 +117,8 @@ the console through the gateway. Stage-by-stage detail and the data split and ga
 ## 5. Architectural Trade-offs & Rationale
 
 1. **Why Hierarchical RAG instead of Flat Search?**
-   * *Problem*: In a flat 50,000-chunk index, cross-queue semantic noise causes IT infrastructure tickets to retrieve irrelevant billing answers.
-   * *Solution*: Routing to queue centroids first cuts the search space by ~80%, increasing precedent relevance and precision.
+   * *Problem*: In a flat index (42,675 rows here), cross-queue semantic noise causes IT infrastructure tickets to retrieve irrelevant billing answers.
+   * *Solution*: Routing to the top 2 of 10 queues first (classifier probability blended with queue centroids) keeps precedents inside the predicted queues, with a global fallback when the routed match is weak. On `kb_val` it matches flat search on useful@1 (0.72 vs 0.73, `ml/artifacts/reports/v1/retrieval_quality.json`) and falls back to global for about 29% of queries.
 2. **Why Redis over External Cloud Vector DBs (Pinecone/Weaviate)?**
    * *Problem*: Cloud vector databases add 80–150ms HTTP network round-trips and external vendor dependencies.
    * *Solution*: Self-hosted Redis in Docker (on EC2 for the hackathon, localhost now) runs in memory, supports atomic `HINCRBY` counters, and backs up cleanly via RDB snapshots.

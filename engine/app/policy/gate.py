@@ -1,6 +1,6 @@
 """
 DA-06: Enterprise Escalation Policy Gate
-Implements the official SentinelDesk escalation protocol:
+Implements the official TriageAI escalation protocol:
 - Any P1 reason  -> ESCALATE_ONCALL
 - Else any P2 reason -> HUMAN_REVIEW
 - No reasons     -> AUTO_DRAFT
